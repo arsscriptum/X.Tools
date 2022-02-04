@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ImportGroup Label="PropertySheets">
+</ImportGroup>
+
+
+<!--  ==========================================================================================  -->
+<!--  |                                 CORELIB INTEGRATION                                    |  -->
+<!--  ==========================================================================================  -->
+<!--  |      ALL  RELATIVE PATHS ARE IN RELATION TO THE SOLUTION          PROJECT FILE         |  -->
+<!--  |      $(ProjectDir)..\externals\$(corelib_image_name)                                   |  -->
+<!--  ==========================================================================================  -->
+
+
+  <PropertyGroup Label="UserMacros">
+    <corelib_image_name>corelib</corelib_image_name>
+    <corelib_version>1.0</corelib_version>
+    <corelib_root_path>$(ProjectDir)..\external\$(corelib_image_name)\</corelib_root_path>
+    <!-- Check for Trailing Slash -->
+    <corelib_root_path  Condition=" '$(corelib_root_path)'!='' AND !HasTrailingSlash('$(corelib_root_path)') ">$(corelib_root_path)\</corelib_root_path>
+  </PropertyGroup>
+
+  <Target Name="SetCorelibEnvironment"  BeforeTargets="_PrepareForBuild">
+        <Message Text="=====================================================================================================================" />
+        <Message Text="TARGET: SetCorelibEnvironment --- corelib at $(corelib_root_path)..." />
+        <Message Text="   headers  path: $(corelib_headers_path)" />
+        <Message Text="   sources  path: $(corelib_sources_path)" />
+        <Message Text="   binaries path: $(corelib_binaries_path)" />
+        <Message Text="   library names: $(corelib_imagename_debug_static), $(corelib_imagename_release_static)" />
+        <Message Text="====================================================================================================================" />
+        <Message Text=""/>
+  </Target>
+
+  <PropertyGroup Label="ConfigurationPlaceHolder" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
+    <ConfigurationPlaceHolder>$(Configuration)</ConfigurationPlaceHolder>
+  </PropertyGroup>
+  <PropertyGroup Label="LibName" Condition="'$(Configuration)'=='Final'">
+    <ConfigurationPlaceHolder>Release</ConfigurationPlaceHolder>
+  </PropertyGroup>
+  <PropertyGroup Label="CorelibPlatform" Condition="'$(Platform)'=='Win32' Or '$(Platform)'=='x86'">
+    <CorelibPlatform>x86</CorelibPlatform>
+  </PropertyGroup>
+  <PropertyGroup Label="NetlibPlatform" Condition="'$(Platform)'=='x64'">
+    <CorelibPlatform>x64</CorelibPlatform>
+  </PropertyGroup> 
+  <!-- General CodeMeter Environment added in UserMacros -->
+  <PropertyGroup Label="LibMacros">
+    <corelib_headers_path>$(corelib_root_path)src\</corelib_headers_path>
+    <corelib_sources_path>$(corelib_root_path)src\</corelib_sources_path>
+    <corelib_sources_fs_path>$(corelib_root_path)src\filesystem\</corelib_sources_fs_path>
+    <corelib_binaries_path>$(corelib_root_path)bin\$(CorelibPlatform)</corelib_binaries_path>
+  </PropertyGroup> 
+
+  <PropertyGroup Label="LibName" Condition="'$(Configuration)'=='Debug'">
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <corelib_imagename_debug_static>$(corelib_image_name)_$(ConfigurationPlaceHolder).lib</corelib_imagename_debug_static>
+    <corelib_imagename_debug_dynamic_lib>$(corelib_image_name)_$(ConfigurationPlaceHolder)Dll.lib</corelib_imagename_debug_dynamic_lib>
+    <corelib_imagename_debug_dynamic_dll>$(corelib_image_name)_$(ConfigurationPlaceHolder)Dll.dll</corelib_imagename_debug_dynamic_dll>
+  </PropertyGroup>
+  <PropertyGroup Label="LibName" Condition="'$(Configuration)'=='Release'">
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <corelib_imagename_release_static>$(corelib_image_name)_Release.lib</corelib_imagename_release_static>
+    <corelib_imagename_release_dynamic_lib>$(corelib_image_name)_ReleaseDll.lib</corelib_imagename_release_dynamic_lib>
+    <corelib_imagename_release_dynamic_dll>$(corelib_image_name)_ReleaseDll.dll</corelib_imagename_release_dynamic_dll>
+  </PropertyGroup>
+  <PropertyGroup Label="LibName" Condition="'$(Configuration)'=='Final'">
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <corelib_imagename_final_static>$(corelib_image_name)_Release.lib</corelib_imagename_final_static>
+    <corelib_imagename_final_dynamic_lib>$(corelib_image_name)_ReleaseDll.lib</corelib_imagename_final_dynamic_lib>
+    <corelib_imagename_final_dynamic_dll>$(corelib_image_name)_ReleaseDll.dll</corelib_imagename_final_dynamic_dll>
+  </PropertyGroup>
+  <PropertyGroup Label="LibName">
+    <corelib_imagename_static>$(corelib_image_name)_$(ConfigurationPlaceHolder).lib</corelib_imagename_static>
+    <corelib_imagename_dynamic_lib>$(corelib_image_name)_$(ConfigurationPlaceHolder)Dll.lib</corelib_imagename_dynamic_lib>
+    <corelib_imagename_dynamic_dll>$(corelib_image_name)_$(ConfigurationPlaceHolder)Dll.dll</corelib_imagename_dynamic_dll>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release' Or '$(Configuration)'=='Final'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(corelib_headers_path);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CORELIB_STATIC;CORELIB_ENABLE_CLIENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='DebugDll' Or '$(Configuration)'=='ReleaseDll'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(corelib_headers_path);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>USE_CORELIB_DLL;CORELIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+        <ClCompile>
+      <AdditionalIncludeDirectories>$(DejaInsightIncludePath);$(corelib_headers_path);$(corelib_sources_path)\filesystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CORELIB;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(corelib_binaries_path);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(corelib_imagename_debug_static);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+      <ClCompile>
+        <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+        <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NDEBUG;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(corelib_binaries_path);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(corelib_imagename_release_static);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Final'">
+      <ClCompile>
+        <DebugInformationFormat>None</DebugInformationFormat>
+        <Optimization>MinSpace</Optimization>
+      <PreprocessorDefinitions>NDEBUG;FINAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(corelib_binaries_path);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(corelib_imagename_final_static);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='DebugDll'">
+    <Link>
+      <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(corelib_binaries_path);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(corelib_imagename_debug_dynamic_lib);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleaseDll'">
+    <Link>
+      <RuntimeLibrary>MultiThreadedDll</RuntimeLibrary>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(corelib_binaries_path);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(corelib_imagename_release_dynamic_lib);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+ <ItemDefinitionGroup Condition="'$(Platform)'=='Win32' Or '$(Platform)'=='x86'">
+      <ClCompile>
+      <PreprocessorDefinitions>WIN_X86;_X86;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN_X64;DEJA_DISABLED;_WIN64;_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

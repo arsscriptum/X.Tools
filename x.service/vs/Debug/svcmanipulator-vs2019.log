@@ -1,0 +1,1 @@
+﻿P:\Development\ServiceManipulator\vs\svcmanipulator-vs2019.vcxproj(41,3): error MSB4019: The imported project "P:\Development\ServiceManipulator\vs\cfg\winapp.props" was not found. Confirm that the expression in the Import declaration "P:\Development\ServiceManipulator\vs\cfg\winapp.props" is correct, and that the file exists on disk.

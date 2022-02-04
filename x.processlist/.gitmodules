@@ -1,0 +1,6 @@
+[submodule "externals/corelib"]
+	path = externals/corelib
+	url = https://github.com/radicaltronic/corelib.git
+[submodule "external/corelib"]
+	path = external/corelib
+	url = https://github.com/codecastor/corelib.git

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\critsec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cthread.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\log.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\cmdline.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\init.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectRoot)src\main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ps_enum.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(ProjectRoot)src\stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\windows-api-ex.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\cmdline.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\macros.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\nowarns.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ps_enum.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdafx.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\targetver.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\windows-api-ex.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\critsec.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cthread.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(ProjectRoot)src\resources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{b1455527-7876-4f2b-9485-e556c177bdb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{3b4e2c3f-8c31-4f4f-96de-9ac95688ae0f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
