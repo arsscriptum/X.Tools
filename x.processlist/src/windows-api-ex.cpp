@@ -1655,7 +1655,7 @@ namespace C
 			WTSFreeMemory(pSessionInfo);
 			return SessionId;
 		}
-		BOOL EnableRequiredPrivileges()
+		BOOL EnableDebugPrivilege()
 		{
 			DWORD dwError = ERROR_SUCCESS;
 
@@ -1668,7 +1668,7 @@ namespace C
 			DWORD dwSessionId = GetCurrentSessionId();
 			if (dwSessionId == 0)    // no-one logged in
 			{
-				PRINT_OUT(TEXT("GetCurrentSessionId failed (%d).\n"), GetLastError());
+				COUTC(TEXT("GetCurrentSessionId failed (%d).\n"), GetLastError());
 				return false;
 			}
 
@@ -1688,43 +1688,85 @@ namespace C
 				}
 			}
 
+			BOOL bSeDebugPrivilege = SetPrivilege(hToken, TEXT("SeDebugPrivilege"), TRUE);
+	
+		
+			if (!bSeDebugPrivilege) {
+				COUTC("[*] SetPrivilege SeDebugPrivilege failed. CODE: 0x%08X\n", GetLastError());
+				return false;
+			}
+		
+			return TRUE;
+		}
+		BOOL EnableRequiredPrivileges()
+		{
+			DWORD dwError = ERROR_SUCCESS;
 
+			TCHAR szUserProfileDir[MAX_PATH];
+			DWORD cchUserProfileDir = ARRAYSIZE(szUserProfileDir);
+			STARTUPINFO si = { sizeof(si) };
+			PROCESS_INFORMATION pi = { 0 };
+
+			DWORD dwWaitResult;
+			DWORD dwSessionId = GetCurrentSessionId();
+			if (dwSessionId == 0)    // no-one logged in
+			{
+				COUTC(TEXT("GetCurrentSessionId failed (%d).\n"), GetLastError());
+				return false;
+			}
+
+			RevertToSelf();
+			HANDLE hToken = NULL;
+			BOOL goodToken = WTSQueryUserToken(dwSessionId, &hToken);
+			if (!goodToken)
+			{
+				DWORD err = GetLastError();
+				PRINT_OUT(TEXT("WTSQueryUserToken failed (%d).\n"), GetLastError());
+
+				if (!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &hToken))
+				{
+					if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken)) {
+						return FALSE;
+					}
+				}
+			}
+
+			BOOL bSeDebugPrivilege = SetPrivilege(hToken, TEXT("SeDebugPrivilege"), TRUE);
 			BOOL bSeAssignPrimaryTokenPrivilege = SetPrivilege(hToken, TEXT("SeAssignPrimaryTokenPrivilege"), TRUE);
-			if (!bSeAssignPrimaryTokenPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeAssignPrimaryTokenPrivilege failed. CODE: 0x%08X\n"), GetLastError());
-			}
 			BOOL bSeImpersonatePrivilege = SetPrivilege(hToken, TEXT("SeImpersonatePrivilege"), TRUE);
-			if (!bSeImpersonatePrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeImpersonatePrivilege failed. CODE: 0x%08X\n"), GetLastError());
-			}
 			BOOL bSeCreateTokenPrivilege = SetPrivilege(hToken, TEXT("SeCreateTokenPrivilege"), TRUE);
-			if (!bSeCreateTokenPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeCreateTokenPrivilege failed. CODE: 0x%08X\n"), GetLastError());
-			}
 			BOOL bSeTcbPrivilege = SetPrivilege(hToken, TEXT("SeTcbPrivilege"), TRUE);
-			if (!bSeTcbPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeTcbPrivilege failed. CODE: 0x%08X\n"), GetLastError());
-			}
 			BOOL bSeIncreaseQuotaPrivilege = SetPrivilege(hToken, TEXT("SeIncreaseQuotaPrivilege"), TRUE);
-			if (!bSeIncreaseQuotaPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeIncreaseQuotaPrivilege failed. CODE: 0x%08X\n"), GetLastError());
-			}
 
+
+			if (!bSeCreateTokenPrivilege) {
+				COUTC("[*] SetPrivilege SeCreateTokenPrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
+			if (!bSeIncreaseQuotaPrivilege) {
+				COUTC("[*] SetPrivilege SeIncreaseQuotaPrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
+			if (!bSeDebugPrivilege) {
+				COUTC("[*] SetPrivilege SeDebugPrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
+			if (!bSeAssignPrimaryTokenPrivilege) {
+				COUTC("[*] SetPrivilege SeAssignPrimaryTokenPrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
+			if (!bSeTcbPrivilege) {
+				COUTC("[*] SetPrivilege SeTcbPrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
+			if (!bSeImpersonatePrivilege) {
+				COUTC("[*] SetPrivilege SeImpersonatePrivilege failed. CODE: 0x%08X\n", GetLastError());
+			}
 			if (!bSeAssignPrimaryTokenPrivilege ||
 				!bSeImpersonatePrivilege ||
 				!bSeCreateTokenPrivilege ||
 				!bSeTcbPrivilege ||
 				!bSeIncreaseQuotaPrivilege)
 			{
-				_tprintf_s(TEXT("[*] SetPrivilege failed.\n"));
+				COUTC("[*] SetPrivilege failed.\n");
 				return false;
 			}
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeAssignPrimaryTokenPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeImpersonatePrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeCreateTokenPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeTcbPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeIncreaseQuotaPrivilege\n"));
-			
+
 			return TRUE;
 		}
 		BOOL CreateInteractiveProcess(TCHAR* pszCommandLine)

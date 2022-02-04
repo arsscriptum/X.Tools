@@ -124,7 +124,11 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 		usage();
 		return 0;
 	}
-
+	if(optNoBanner){
+		bool privEnabled = C::Process::EnableDebugPrivilege();
+		COUTY("EnableDebugPrivilege: %d",privEnabled?1:0);
+	}
+	
 	std::unordered_map<DWORD, std::string> ProcessList;
 
 	DWORD bufferSize = MAX_PATH;

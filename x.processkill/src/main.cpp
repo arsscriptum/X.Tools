@@ -79,7 +79,11 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 		usage();
 		return 0;
 	}
-	C::Process::EnableRequiredPrivileges();
+
+	bool privEnabled = C::Process::EnableRequiredPrivileges();
+	if(optVerbose){
+		COUTY("[i] privEnabled: %d",privEnabled?1:0);
+	}
 
 	DWORD bufferSize = MAX_PATH;
 	TCHAR processname[MAX_PATH + 1], * stop;
@@ -93,7 +97,7 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 	DWORD Res = 0;
 	TCHAR szName[MAX_PATH];
 
-std::string pName;
+	std::string pName;
 	memset(szName, 0, MAX_PATH);
 	memset(fileExt, 0, MAX_PATH);
 	memset(fileDir, 0, MAX_PATH);
@@ -153,10 +157,10 @@ std::string pName;
 							pName = ProcessList[aProcesses[i]];
 							DWORD errId = GetLastError();
 							String strError = GetErrorMessage(errId);
-							COUTRS("%s - %s (pid %d) ERROR [%#08x] %s\n", argv[0], pName.c_str(), aProcesses[i], errId, strError.c_str());
+							COUTC("%s - %s (pid %d) ERROR [%#08x] %s\n", argv[0], pName.c_str(), aProcesses[i], errId, strError.c_str());
 						}
 						else {
-							COUTRS("%s - process %s (pid %d) terminated\n", argv[0], pName.c_str(), aProcesses[i]);
+							COUTC("%s - process %s (pid %d) terminated\n", argv[0], pName.c_str(), aProcesses[i]);
 						}
 					}
 				}

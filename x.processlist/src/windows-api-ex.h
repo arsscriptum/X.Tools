@@ -303,7 +303,7 @@ namespace C
 		//FEATURE: GetAllProcesses()
 		//FEATURE: BOOL EnableDebugPrivilege();
 		LPCWSTR GetIntegrityLevelName(DWORD integrityLevel);
-
+		BOOL EnableDebugPrivilege();
 		DWORD GetProcessIdByName(LPCWSTR name);
 		BOOL CreateProcessWithIntegrity(LPCWSTR commandLine, DWORD integrityLevel, LPDWORD processId);
 		BOOL TerminateProcess(DWORD processId, UINT uExitCode);

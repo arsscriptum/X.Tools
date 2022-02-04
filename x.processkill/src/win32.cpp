@@ -1930,7 +1930,7 @@ namespace C
 			DWORD dwSessionId = GetCurrentSessionId();
 			if (dwSessionId == 0)    // no-one logged in
 			{
-				PRINT_OUT(TEXT("GetCurrentSessionId failed (%d).\n"), GetLastError());
+				COUTC(TEXT("GetCurrentSessionId failed (%d).\n"), GetLastError());
 				return false;
 			}
 
@@ -1959,22 +1959,22 @@ namespace C
 
 #ifdef _DEBUG
 			if (!bSeCreateTokenPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeCreateTokenPrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeCreateTokenPrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeIncreaseQuotaPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeIncreaseQuotaPrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeIncreaseQuotaPrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeDebugPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeDebugPrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeDebugPrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeAssignPrimaryTokenPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeAssignPrimaryTokenPrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeAssignPrimaryTokenPrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeTcbPrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeTcbPrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeTcbPrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeImpersonatePrivilege) {
-				_tprintf_s(TEXT("[*] SetPrivilege SeImpersonatePrivilege failed. CODE: 0x%08X\n"), GetLastError());
+				COUTC("[*] SetPrivilege SeImpersonatePrivilege failed. CODE: 0x%08X\n", GetLastError());
 			}
 			if (!bSeAssignPrimaryTokenPrivilege ||
 				!bSeImpersonatePrivilege ||
@@ -1982,14 +1982,9 @@ namespace C
 				!bSeTcbPrivilege ||
 				!bSeIncreaseQuotaPrivilege)
 			{
-				_tprintf_s(TEXT("[*] SetPrivilege failed.\n"));
+				COUTC("[*] SetPrivilege failed.\n");
 				return false;
 			}
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeAssignPrimaryTokenPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeImpersonatePrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeCreateTokenPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeTcbPrivilege\n"));
-			_tprintf_s(TEXT("[*] Privilege Enabled: SeIncreaseQuotaPrivilege\n"));
 #endif
 			return TRUE;
 		}
