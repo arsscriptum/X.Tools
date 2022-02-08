@@ -5,12 +5,12 @@
 
 #include "Controller.h"
 #include "Enumerator.h"
-
+#include "log.h"
 #include <iostream>
 #include <codecvt>
 #include <locale> 
 
-
+#include <iomanip>
 using namespace std;
 bool opt_wait = false;
 bool opt_verbose = false;
@@ -259,14 +259,52 @@ int main(int argc, char *argv[])
 
 	if(opt_svc_list)
 	{
-
-		printf("%s\t%s\t%s\n", "Start Name","Display Name","Binary Path");
-
-		std::wcout << "==================================" << std::endl;
-		std::wcout << "Service list" << std::endl;
+		int maxlen0= 0;
+		int maxlen1=0;
+		int maxlen2= 0;
 		for (auto const& s : services)
 		{
 			auto service = ServiceController{ s.ServiceName };
+			int l=s.ServiceName.length();
+			if(l>maxlen1){maxlen1 = l;}
+			auto config = service.GetServiceConfig();
+			l=config.GetDisplayName().length();
+			if(l>maxlen2){maxlen2 = l;}
+
+			ServiceStatus st = service.GetStatus();
+			ServiceString str = ServiceStatusToString(st);
+			l=str.length();
+			if(l>maxlen0){maxlen0 = l;}
+		}
+		int field_1 = maxlen0+3, field_2 = maxlen1+2, field_3 = maxlen2+2;
+		wcout<< std::endl <<setw(field_1)<<left<<"Status";
+				wcout<<setw(field_2)<<left<<"Name";
+				wcout<<setw(field_3)<<left<<"Display Name"<< std::endl;
+		ServiceString placeholder;
+		ServiceString placeholder_status;
+		placeholder_status.insert(0,field_1,'=');
+		placeholder.insert(0,field_2,'=');
+		wcout<<"\u001b[36m"<< std::endl;
+		wcout<< setw(field_1)<<left<<"-------";
+				wcout<<setw(field_2)<<left<<"----";
+				wcout<<setw(field_3)<<left<<"------------"<< std::endl;	
+		wcout<<"\u001b[0m"<< std::endl;			
+		
+		for (auto const& s : services)
+		{
+			auto service = ServiceController{ s.ServiceName };
+			if(!service.HasValidHandle()){
+				if(opt_verbose){
+						std::wcout << "[o] ServiceController SERVICE_ALL_ACCESS failed " << std::endl;	
+					}
+				service = ServiceController{ s.ServiceName, SERVICE_QUERY_CONFIG|SERVICE_QUERY_STATUS  };
+				if(!service.HasValidHandle()){
+					if(opt_verbose){
+						std::wcout << "[o] ServiceController SERVICE_ALL_ACCESS and SERVICE_QUERY_CONFIG failed " << std::endl;	
+					}
+					continue;
+				}
+			}
 			auto config = service.GetServiceConfig();
 			if(opt_svc_name){
 				
@@ -277,12 +315,21 @@ int main(int argc, char *argv[])
 					std::wcout << "[o] Found service " << service_name << std::endl;
 
 					auto service = ServiceController{ s.ServiceName };
+					if(!service.HasValidHandle()){continue;}
 					auto config = service.GetServiceConfig();
 					print_service_details(config);	
 				}
 			}
 			else{
-				printf("====\n  Name: %ls\n  Bin : %ls\n", config.GetDisplayName().c_str(), config.GetBinaryPathName().c_str());	
+				
+				ServiceStatus st = service.GetStatus();
+				ServiceString str = ServiceStatusToString(st);
+				ServiceString strformat = ServiceStatusToFormatString(st);
+				wcout<<strformat.c_str();
+				wcout<<setw(field_1)<<left<<str.c_str();
+				wcout<<setw(field_2)<<left<<s.ServiceName.c_str();
+				wcout<<setw(field_3)<<left<<config.GetDisplayName().c_str();
+				wcout<<"\u001b[0m"<< std::endl;			
 			}	
 		}
 		
@@ -302,7 +349,7 @@ int main(int argc, char *argv[])
 			std::wcout << "[o] Found service " << service_name << std::endl;
 
 			auto service = ServiceController{ s.ServiceName };
-
+			if(!service.HasValidHandle()){continue;}
 			ServiceStatus st = service.GetStatus();
 			ServiceString str = ServiceStatusToString(st);
 			std::wcout << "[o] Service Status is " << str << std::endl;

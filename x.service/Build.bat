@@ -98,7 +98,7 @@ goto :init
 ::   Build x64
 :: ==============================================================================
 :build_x64
-    call :call_make_build_export Release x64 "c:\Programs\SystemTools"
+    call :call_make_build ReleaseUnicode x64
     goto :eof
 
 :: ==============================================================================

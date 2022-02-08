@@ -28,14 +28,11 @@ public:
    ServiceController(ServiceString name, DWORD access = SERVICE_ALL_ACCESS)
    {
       srvName = name;
-      access = SERVICE_START | SERVICE_QUERY_CONFIG  | SERVICE_STOP; //SERVICE_CHANGE_CONFIG 
       scHandle = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
       if (scHandle)
       {
          srvHandle = ::OpenService(scHandle, name.c_str(), access);
-         if (!srvHandle)
-         {
-            printf("[ERROR] ServiceController OpenService returned NULL\n");
+         if (!srvHandle){
             scHandle = nullptr;
          }
          else
@@ -216,6 +213,7 @@ public:
 
    ServiceString GetServiceName() const   { return srvName; }
 
+   bool HasValidHandle() const   { return scHandle != nullptr; }
 private:
    ServiceHandle scHandle;
    ServiceHandle srvHandle;

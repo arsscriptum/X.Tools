@@ -150,6 +150,21 @@ ServiceString ServiceStatusToString(ServiceStatus const status)
    }
 }
 
+ServiceString ServiceStatusToFormatString(ServiceStatus const status)
+{
+   switch (status)
+   {
+      case ServiceStatus::Stopped:     return _T("\u001b[31m");
+      case ServiceStatus::Starting:    return _T("\u001b[32m");
+      case ServiceStatus::Stopping:    return _T("\u001b[31m");
+      case ServiceStatus::Running:     return _T("\u001b[32m");
+      case ServiceStatus::Continuing:  return _T("\u001b[36m");
+      case ServiceStatus::Pausing:     return _T("\u001b[37m");
+      case ServiceStatus::Paused:      return _T("\u001b[37m");
+      default:                         return _T("\u001b[37m");
+   }
+}
+
 ServiceString ServiceTypeToString(ServiceType const type)
 {
    switch (type)
