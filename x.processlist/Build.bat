@@ -98,12 +98,9 @@ goto :init
 ::   Build x64
 :: ==============================================================================
 :build_x64
-    call :call_make_build Release x64
-    goto :eof
-    
-:build_x64_ex
     call :call_make_build_export Release x64 "c:\Programs\SystemTools"
     goto :eof
+
 :: ==============================================================================
 ::   clean all
 :: ==============================================================================
@@ -119,16 +116,20 @@ goto :init
 ::   Build
 :: ==============================================================================
 :build
-	echo "%__target%"
-
-    if "%__target%" == "ex" (
-		call :clean
-        call :build_x64_ex
+    echo "%__target%"
+    if "%__target%" == "clean" (
+        call :clean
         goto :finished
-		)
+        )
+    if "%__target%" == "rebuild" (
+        call :clean
+        )
     
     ::call :build_x86
     call :build_x64
+    del  "c:\Programs\SystemTools\pl.exe"
+    echo "new" > "c:\Programs\SystemTools\pl.exe"
+    xcopy "P:\Development\X.Tools\x.processlist\bin\x64\Release\xps.exe" "c:\Programs\SystemTools\pl.exe" /Y
     goto :finished
 
 

@@ -29,7 +29,8 @@
 
 void banner() {
 	std::wcout << std::endl;
-	COUTC("xps v1.0 - Process List Tool\n");
+	COUTC("xps v2.1 - Process List Tool\n");
+	COUTC("Built on %s\n", __TIMESTAMP__);
 	COUTC("Copyright (C) 2000-2021 Guillaume Plante\n");
 	COUTC("Process/Service Tool Suite\n");
 	std::wcout << std::endl;
@@ -77,6 +78,16 @@ DWORD* sort6(PDWORD* v, int size)
     return table;
 }
 
+bool ArgsToString(int args_count, char** args) {
+  if (args_count <= 1) return false;
+  if (args_count == 2) return true;
+  for (int i = 2; i < args_count; ++i) {
+    char* cursor = args[i];
+    while (*cursor) --cursor;
+    *cursor = ' ';
+  }
+  return true;
+}
 
 #define DOMAINLOCAL  TEXT("desktop-lk1v00r")
 #define ADMIN_PASS  TEXT("MaMemoireEstMaCle7955")
@@ -102,6 +113,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	CmdlineOption cmdlineOptionPath({ "-p", "--path" }, "print process path");
 	CmdlineOption cmdlineOptionNoBanner({ "-n", "--nobanner" }, "no banner");
 	CmdlineOption cmdlineOptionSort({ "-s", "--sort" }, "sort");
+	CmdlineOption cmdlineOptionAdmin({ "-a", "--admin" }, "admin mode");
 
 
 	inputParser->addOption(cmdlineOptionHelp);
@@ -109,6 +121,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	inputParser->addOption(cmdlineOptionPath); 
 	inputParser->addOption(cmdlineOptionSort); 
 	inputParser->addOption(cmdlineOptionNoBanner); 
+	inputParser->addOption(cmdlineOptionAdmin); 
 
 
 	bool optHelp = inputParser->isSet(cmdlineOptionHelp);
@@ -116,6 +129,13 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	bool optPsPath = inputParser->isSet(cmdlineOptionPath);
 	bool optSort = inputParser->isSet(cmdlineOptionSort);
 	bool optNoBanner = inputParser->isSet(cmdlineOptionNoBanner);
+	bool optAdmin = inputParser->isSet(cmdlineOptionAdmin);
+
+	std::string current_exec_name = argv[0]; // Name of the current exec program
+  	std::vector<std::string> all_args;
+
+	std::string commandLineStr= "";
+	for (int i=1;i<argc;i++) commandLineStr.append(std::string(argv[i]).append(" "));
 
 	if(optNoBanner == false){
 		banner();
@@ -129,6 +149,15 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 		COUTY("EnableDebugPrivilege: %d",privEnabled?1:0);
 	}
 	
+
+	if(optAdmin){
+		if(C::Process::IsRunAsAdministrator() == false){
+			COUTY("Request Admin Mode\n");
+			C::Process::ElevateNow(argc, commandLineStr.c_str(),envp);
+		}else{
+			COUTR("Request Admin Mode: ALREADY in ADMIN MODE\n");
+		}
+	}
 	std::unordered_map<DWORD, std::string> ProcessList;
 
 	DWORD bufferSize = MAX_PATH;
@@ -140,11 +169,11 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	SIZE_T nbProcesses;
 	HANDLE hProcess;
 	processes = lpProcesses;
-
+	TCHAR* processIdentifier = nullptr;
 	bool shouldCheckUserDefined = false;
 	std::vector<std::string> ListedProcess;
 	for (int x = 1; x < argc; x++) {
-		TCHAR* processIdentifier = argv[x];
+		processIdentifier = argv[x];
 		
 		if (isalpha(*processIdentifier)){
 			ListedProcess.push_back(processIdentifier);
@@ -195,8 +224,10 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 			decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
 			ProcessList[processes[i]] = fileName;
 			if(shouldCheckUserDefined){
-				for (const auto& ups : ListedProcess) {
-					bool found = ups.find(fileName)!=std::string::npos;
+				std::string currentProcessString = fileName;
+				for (const std::string& ups : ListedProcess) {
+					
+					bool found = (strstr(currentProcessString.c_str(),ups.c_str()));
 					if (found)
 						//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
 						ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str());
@@ -227,6 +258,11 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 		COUTRS("Running with admin privileges\n");
 	}else{
 		COUTRS("Running without admin privileges\n");
+	}
+
+	if(shouldCheckUserDefined){
+		printf("Press any key...");
+    	getchar();
 	}
 
 	return 0;

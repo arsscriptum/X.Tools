@@ -2072,7 +2072,7 @@ namespace C
 		}
 
 
-		void ElevateNow(int argc, TCHAR argv[], TCHAR envp)
+		void ElevateNow(int argc, const TCHAR *argv, TCHAR envp)
 		{
 			BOOL bAlreadyRunningAsAdministrator = FALSE;
 			try
@@ -2092,14 +2092,9 @@ namespace C
 				TCHAR szPath[MAX_PATH];
 				if (GetModuleFileName(NULL, szPath, ARRAYSIZE(szPath)))
 				{
-					std::cout << "Running under ELEVATION: " << szPath << std::endl;
-					TCHAR szParams[256];
-					_stprintf_s(szParams, ARRAYSIZE(szParams), _T("-u tet"));
-					std::cout << szParams << std::endl;
-
 					// Launch itself as admin
 					SHELLEXECUTEINFO sei = { sizeof(sei) };
-					sei.lpParameters = szParams;
+					sei.lpParameters = argv;
 					sei.fMask = SEE_MASK_FLAG_DDEWAIT | SEE_MASK_NOCLOSEPROCESS;
 					sei.lpVerb = TEXT("runas");
 					sei.lpFile = szPath;

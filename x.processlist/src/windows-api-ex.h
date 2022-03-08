@@ -327,7 +327,7 @@ namespace C
 		BOOL GetProcessbyNameOrId(LPTSTR searchstring, PHANDLE phProcess, DWORD rights);
 		DWORD GetProcessSession(HANDLE hProcess);
 		BOOL IsRunAsAdministrator();
-		void ElevateNow(int argc, TCHAR argv[], TCHAR envp);
+		void ElevateNow(int argc, const TCHAR *argv, TCHAR envp);
 		BOOL EnableRequiredPrivileges();
 		bool FillModuleListPSAPI(TModules& mods, DWORD pid, HANDLE hProcess);
 		bool FillModuleListTH32(C::Process::TModules& modules, DWORD pid);

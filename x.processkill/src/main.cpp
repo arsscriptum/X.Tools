@@ -25,9 +25,11 @@
 #pragma message( "Last modified on " __TIMESTAMP__ )
 
 
+
 void banner() {
 	std::wcout << std::endl;
-	COUTC("xpk v1.0 - Process Kill Tool\n");
+	COUTC("xpk v2.1 - Process Kill Tool\n");
+	COUTC("Built on %s\n", __TIMESTAMP__);
 	COUTC("Copyright (C) 2000-2021 Guillaume Plante\n");
 	COUTC("Process/Service Tool Suite\n");
 	std::wcout << std::endl;
