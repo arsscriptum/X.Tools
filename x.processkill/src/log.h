@@ -116,6 +116,7 @@ const std::string CONSOLE_COLOR_YELLOW = "\u001b[33m";
     const std::string WHITE_UNDERLINED = "\033[4;37m";  // WHITE
     const std::string WHITE_UNDERLINED_B = "\033[4;37m";  // WHITE
 
+void __cdecl ConsoleOutNoRl( std::string color, const char *format, ...);
 void __cdecl ConsoleOut( std::string color, const char *format, ...);
 void __cdecl SystemDebugOutput(const wchar_t *channel, const char *format, ...);
 void __cdecl ConsoleLog(const char *format, ...);
@@ -131,6 +132,11 @@ void __cdecl ConsoleTrace(const char *format, ...);
 # define COUTR( ... ) { ConsoleOut(CONSOLE_COLOR_RED_BRIGHT,  __VA_ARGS__ );  }	
 # define COUTG( ... ) { ConsoleOut(CONSOLE_COLOR_GREEN_BRIGHT,  __VA_ARGS__ );  }	
 # define COUTY( ... ) { ConsoleOut(CONSOLE_COLOR_YELLOW,  __VA_ARGS__ );  }	
+# define COUTYRL( ... ) { ConsoleOutNoRl(YELLOW_UNDERLINED,  __VA_ARGS__ );  } 
+# define COUTBM( ... ) { ConsoleOutNoRl(CONSOLE_COLOR_YELLOW_BRIGHT,  __VA_ARGS__ );  } 
+# define COUTMM( ... ) { ConsoleOutNoRl(CONSOLE_COLOR_RED,  __VA_ARGS__ );  } 
+# define COUTGG( ... ) { ConsoleOutNoRl(CONSOLE_COLOR_GREEN_BRIGHT,  __VA_ARGS__ );  } 
+# define COUTYY( ... ) { ConsoleOutNoRl(CONSOLE_COLOR_YELLOW,  __VA_ARGS__ );  } 
 # define COUTBB( ... ) { ConsoleOut(ANSI_TEXT_COLOR_BLACK,  __VA_ARGS__ );  }	
 # define COUTC( ... ) { ConsoleOut(CONSOLE_COLOR_CYAN_BRIGHT,  __VA_ARGS__ );  }	
 # define COUTCS( ... ) { ConsoleOut(CONSOLE_COLOR_CYAN,  __VA_ARGS__ );  }

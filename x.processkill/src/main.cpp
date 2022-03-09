@@ -38,6 +38,7 @@ void usage(){
 	COUTCS("Usage: xpk.exe [-h][-v][-n][-x] [ process name or id ]\n");
 	COUTCS("   -v          Verbose Show All process even access denied\n");
 	COUTCS("   -h          Help\n");
+	COUTCS("   -s          Search Process name matching\n");
 	COUTCS("   -n          No banner\n");
 	COUTCS("   -x code     Exit Code\n");	
 	std::wcout << std::endl;
@@ -60,7 +61,7 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 	CmdlineOption cmdlineOptionVerbose({ "-v", "--verbose" }, "verbose output");
 	CmdlineOption cmdlineOptionXcode({ "-x", "--exit" }, "exit code");
 	CmdlineOption cmdlineOptionNoBanner({ "-n", "--nobanner" }, "no banner");
-
+	CmdlineOption cmdlineOptionSearch({ "-s", "--search" }, "search");
 	CmdlineOption cmdlineOptionWhatIf({ "-w", "--whatif" }, "whatif");
 
 	inputParser->addOption(cmdlineOptionHelp);
@@ -68,12 +69,15 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 	inputParser->addOption(cmdlineOptionXcode); 
 	inputParser->addOption(cmdlineOptionNoBanner); 
 	inputParser->addOption(cmdlineOptionWhatIf); 
+	inputParser->addOption(cmdlineOptionSearch); 
+
 
 	bool optHelp = inputParser->isSet(cmdlineOptionHelp);
 	bool optVerbose = inputParser->isSet(cmdlineOptionVerbose);
 	bool optXcode= inputParser->isSet(cmdlineOptionXcode);
 	bool optNoBanner = inputParser->isSet(cmdlineOptionNoBanner);
 	bool optWhatIf = inputParser->isSet(cmdlineOptionWhatIf);
+	bool optSearch = inputParser->isSet(cmdlineOptionSearch);
 	if(optNoBanner == false){
 		banner();
 	}
@@ -119,14 +123,21 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 		TCHAR* processIdentifier = argv[x];
 		
 		if(isalpha(*processIdentifier)){
-			ListedProcess.push_back(processIdentifier);
-			psok = true;
-			shouldCheckUserDefined = true;
+				ListedProcess.push_back(processIdentifier);
+				psok = true;
+				shouldCheckUserDefined = true;
+				COUTYY("Searching this process name: ");
+				COUTBM("%s\n\n", processIdentifier);
+				printf("\n");
+				if(optSearch){
+					COUTYRL("Search: All Matching Names");
+					printf("\n");
+				}
+			
 		} else if(isdigit(*processIdentifier)){
 			psok = true;
 		}
 	}
-
 	if (!psok) {
 		COUTY("ERROR : no process specified");
 		return -1;
@@ -142,27 +153,48 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 			listed++;
 			std::string processnameDouble = std::regex_replace(processname, std::regex(R"(\\)"), R"(\\)");
 			decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
+
 			ProcessList[aProcesses[i]] = fileName;
 			if(shouldCheckUserDefined){
-				for (const auto& ups : ListedProcess) {
-					bool found = ups.find(fileName)!=std::string::npos;
+				std::string currentProcessString = fileName;
+				for (const std::string& ups : ListedProcess) {
+					bool found = false;
+					if(optSearch){
+						found = (strstr(currentProcessString.c_str(),ups.c_str()));	
+					}else{
+						found = currentProcessString == ups;
+					}
+					
 					if (found){
 						BOOL killed = false;
 						if(optWhatIf){
 							killed = true;
-							COUTY("WHAT IF Kill %s - process %s (pid %d)\n", argv[0], pName.c_str(), aProcesses[i]);
+							C::Process::ProcessIdToName(aProcesses[i], processname, bufferSize);
+							COUTGG("[WHAT IF] ");	
+							COUTMM("%s",processname); 
+							COUTBM(" (pid %d) ", aProcesses[i]);
+							COUTGG(" NOT terminated\n");
+							printf("\n");
 						}else{
-							killed = C::Process::TerminateProcess(aProcesses[i], uExitCode);
+								killed = C::Process::TerminateProcess(aProcesses[i], uExitCode);
 						}
 						
 						if (!killed) {
-							pName = ProcessList[aProcesses[i]];
-							DWORD errId = GetLastError();
-							String strError = GetErrorMessage(errId);
-							COUTC("%s - %s (pid %d) ERROR [%#08x] %s\n", argv[0], pName.c_str(), aProcesses[i], errId, strError.c_str());
+								pName = ProcessList[aProcesses[i]];
+								C::Process::ProcessIdToName(aProcesses[i], processname, bufferSize);	
+								DWORD errId = GetLastError();
+								String strError = GetErrorMessage(errId);
+								COUTYRL("%s (pid %d) ERROR [%#08x] %s\n", processname, aProcesses[i], errId, strError.c_str());
+								printf("\n");
 						}
-						else {
-							COUTC("%s - process %s (pid %d) terminated\n", argv[0], pName.c_str(), aProcesses[i]);
+						else{
+							if(!optWhatIf){
+								C::Process::ProcessIdToName(aProcesses[i], processname, bufferSize);	
+								COUTYY("%s",processname); 
+								COUTBM(" (pid %d) ", aProcesses[i]);
+								COUTMM(" terminated\n");
+								printf("\n");
+							}
 						}
 					}
 				}
@@ -175,7 +207,6 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 					
 			}
 		}
-	
 	}
 	
 	for (int x = 1; x < argc; x++) {
@@ -199,7 +230,7 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 				COUTRS("%s - %s (pid %d) ERROR [%#08x] %s\n", argv[0], pName.c_str(), processId, errId, strError.c_str());
 			}
 			else {
-				COUTRS("%s - process %s (pid %d) terminated\n", argv[0], pName.c_str(), processId);
+				COUTRS("%s (pid %d) terminated\n",  pName.c_str(), processId);
 			}
 		}
 	}
