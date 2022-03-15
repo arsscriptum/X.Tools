@@ -140,6 +140,7 @@ void __cdecl ConsoleTrace(const char *format, ...);
 # define COUTBB( ... ) { ConsoleOut(ANSI_TEXT_COLOR_BLACK,  __VA_ARGS__ );  }	
 # define COUTC( ... ) { ConsoleOut(CONSOLE_COLOR_CYAN_BRIGHT,  __VA_ARGS__ );  }	
 # define COUTCS( ... ) { ConsoleOut(CONSOLE_COLOR_CYAN,  __VA_ARGS__ );  }
+# define COUTCSNR( ... ) { ConsoleOutNoRl(CONSOLE_COLOR_CYAN,  __VA_ARGS__ );  }
 # define COUTTITLE( x ) { ConsoleTitle(  x );  }	
 # define COUTINFO( ... ) { ConsoleOut( CONSOLE_COLOR_BKGRND_WHITE, __VA_ARGS__ );  }	
 # define LOG_CONSOLE( color, ... ) { ConsoleOut( color, __VA_ARGS__ );  }	

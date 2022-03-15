@@ -36,9 +36,12 @@ void banner() {
 }
 void usage(){
 	COUTCS("Usage: xpk.exe [-h][-v][-n][-x] [ process name or id ]\n");
-	COUTCS("   -v          Verbose Show All process even access denied\n");
+	COUTCS("   -v          Verbose mode\n");
 	COUTCS("   -h          Help\n");
-	COUTCS("   -s          Search Process name matching\n");
+	COUTCSNR("   -s          Search mode: kill process with name matching");
+	COUTRS("  DANGER *");
+	COUTCSNR("   -w          WhatIf: do not actually kill process.");
+	COUTY("  Suggested use with -s.");
 	COUTCS("   -n          No banner\n");
 	COUTCS("   -x code     Exit Code\n");	
 	std::wcout << std::endl;
@@ -111,7 +114,7 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 
 	DWORD nb_processes = C::Process::FillProcessesList(aProcesses, QUITE_LARGE_NB_PROCESSES);
 
-
+	int processedKilled = 0;
 	if (!nb_processes) {
 		COUTRS("ERROR : Could not enumerate process list\n");
 		return -1;
@@ -150,11 +153,15 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 		BOOL  bInheritHandle = FALSE;
 		HANDLE hProcess = OpenProcess(dwDesiredAccess, bInheritHandle, aProcesses[i]);
 		if (hProcess && C::Process::ProcessIdToName(aProcesses[i], processname, bufferSize)) {
+
 			listed++;
 			std::string processnameDouble = std::regex_replace(processname, std::regex(R"(\\)"), R"(\\)");
 			decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
 
 			ProcessList[aProcesses[i]] = fileName;
+			if(optVerbose){
+				printf("%s (pid %d) located process...\n",processname,aProcesses[i]); 
+			}			
 			if(shouldCheckUserDefined){
 				std::string currentProcessString = fileName;
 				for (const std::string& ups : ListedProcess) {
@@ -193,6 +200,7 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 								COUTYY("%s",processname); 
 								COUTBM(" (pid %d) ", aProcesses[i]);
 								COUTMM(" terminated\n");
+								processedKilled++;
 								printf("\n");
 							}
 						}
@@ -231,8 +239,14 @@ int main(int argc, TCHAR** argv, TCHAR envp)
 			}
 			else {
 				COUTRS("%s (pid %d) terminated\n",  pName.c_str(), processId);
+				processedKilled++;
 			}
 		}
 	}
+
+	COUTRS("Terminated: %d.\n", processedKilled);
+	if(optVerbose){
+		COUTY("%d denied, listed %d",denied, listed); 	
+	}		
 	return 0;
 }
