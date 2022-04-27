@@ -64,7 +64,8 @@ goto :init
 :prebuild_header
     call %__lib_date% :getbuilddate
     call %__lib_out% :__out_d_red " ======================================================================="
-    call %__lib_out% :__out_l_red " Compilation started for %cd%  %__target%"  
+    call %__lib_out% :__out_l_red " Compilation started for %cd%  %__target%" 
+    call %__lib_out% :__out_l_blu " EXPORT TO %ToolsRoot%"  
     call %__lib_out% :__out_d_red " ======================================================================="
     call :build
     goto :eof
@@ -86,19 +87,13 @@ goto :init
     call %__makefile% /v /i %__build_cfg% /t Build /c %config% /p %platform% /x %export_path%
     goto :finished
 
-:: ==============================================================================
-::   Build static
-:: ==============================================================================
-:build_x86
-    call :call_make_build Debug x86
-    call :call_make_build Release x86
-    goto :eof
+
 
 :: ==============================================================================
 ::   Build x64
 :: ==============================================================================
 :build_x64
-    call :call_make_build ReleaseUnicode x64
+    call :call_make_build_export ReleaseUnicode x64 %ToolsRoot%
     goto :eof
 
 :: ==============================================================================
@@ -116,16 +111,7 @@ goto :init
 ::   Build
 :: ==============================================================================
 :build
-	echo "%__target%"
-	if "%__target%" == "clean" (
-		call :clean
-		goto :finished
-		)
-    if "%__target%" == "rebuild" (
-		call :clean
-		)
-    
-    ::call :build_x86
+	rmrf .\vs\___temp_compilation_files  bin 
     call :build_x64
     goto :finished
 

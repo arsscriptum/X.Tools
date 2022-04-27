@@ -24,6 +24,8 @@ goto :init
     set "__lib_out=%__scripts_root%\batlibs\out.bat"
     ::*** This is the important line ***
     set "__build_cfg=%__script_path%buildcfg.ini"
+    set "__bin_path=%__script_path%bin"
+    set "__tmp_path=%__script_path%vs\___temp_compilation_files"
     set "__build_cancelled=0"
     goto :validate
 
@@ -61,12 +63,27 @@ goto :init
     goto :prebuild_header
 
 
+
 :prebuild_header
     call %__lib_date% :getbuilddate
     call %__lib_out% :__out_d_red " ======================================================================="
     call %__lib_out% :__out_l_red " Compilation started for %cd%  %__target%"  
     call %__lib_out% :__out_d_red " ======================================================================="
     call :build
+    goto :eof
+
+
+:prebuild_clean
+    call %__lib_out% :__out_d_yel " ======================================================================="
+    call %__lib_out% :__out_l_yel "                              CLEANING                                  "  
+    call %__lib_out% :__out_d_yel " ======================================================================="
+    call %__lib_out% :__out_n_d_cya "DELETE "  
+    call %__lib_out% :__out_d_grn "%__tmp_path%"  
+    rmrf %__tmp_path%
+    call %__lib_out% :__out_n_d_cya "DELETE "  
+    call %__lib_out% :__out_d_grn "%__bin_path%"  
+    rmrf %__bin_path%
+
     goto :eof
 
 
@@ -116,22 +133,9 @@ goto :init
 ::   Build
 :: ==============================================================================
 :build
-    echo "%__target%"
-    if "%__target%" == "clean" (
-        call :clean
-        goto :finished
-        )
-    if "%__target%" == "rebuild" (
-        call :clean
-        )
-    
-    ::call :build_x86
+    call :prebuild_clean
     call :build_x64
-    del  "c:\Programs\SystemTools\pl.exe"
-    echo "new" > "c:\Programs\SystemTools\pl.exe"
-    xcopy "P:\Development\X.Tools\x.processlist\bin\x64\Release\xps.exe" "c:\Programs\SystemTools\pl.exe" /Y
     goto :finished
-
 
 :error_missing_path
     echo.
