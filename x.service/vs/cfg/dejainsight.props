@@ -19,9 +19,9 @@
 
   <!-- Get the solution root folder from registry -->
   <PropertyGroup Condition="'$(DisableRegistryUse)' != 'true'" Label="DejaInsightGlobals">
-    <DejaToolsRootDirectory Condition="'$(DejaToolsRootDirectory)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\cybercastor\development\dejainsight@SdkDirectory)</DejaToolsRootDirectory>
-    <DejaToolsSdkIncludes Condition="'$(DejaToolsSdkIncludes)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\cybercastor\development\dejainsight@Sdk_Includes)</DejaToolsSdkIncludes>
-    <DejaToolsSdkLibs Condition="'$(DejaToolsSdkLibs)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\cybercastor\development\dejainsight@Sdk_Libs)</DejaToolsSdkLibs>
+    <DejaToolsRootDirectory Condition="'$(DejaToolsRootDirectory)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\_gp\development\dejainsight@SdkDirectory)</DejaToolsRootDirectory>
+    <DejaToolsSdkIncludes Condition="'$(DejaToolsSdkIncludes)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\_gp\development\dejainsight@Sdk_Incs)</DejaToolsSdkIncludes>
+    <DejaToolsSdkLibs Condition="'$(DejaToolsSdkLibs)' == ''">$(Registry:HKEY_CURRENT_USER\SOFTWARE\_gp\development\dejainsight@Sdk_Libs)</DejaToolsSdkLibs>
 
     <!-- Check for Trailing Slash -->
     <DejaToolsRootDirectory Condition=" '$(DejaToolsRootDirectory)'!='' AND !HasTrailingSlash('$(DejaToolsRootDirectory)') ">$(DejaToolsRootDirectory)\</DejaToolsRootDirectory>

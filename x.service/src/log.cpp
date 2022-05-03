@@ -63,11 +63,13 @@ void __cdecl ConsoleLog(const char *format, ...)
 	*p++ = '\n';
 	*p = '\0';
 
-	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_YELLOW, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatTitle{ CONSOLE_COLOR_GREEN_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_GREEN, ANSI_TEXT_COLOR_RESET };
+	std::clog << FormatTitle << "[app] ";
 	std::clog << FormatText << buf;
 }
 
-void __cdecl ConsoleTrace(const char *format, ...)
+void __cdecl ConsoleInstaller(const char *format, ...)
 {
 	char    buf[4096], *p = buf;
 	va_list args;
@@ -82,73 +84,63 @@ void __cdecl ConsoleTrace(const char *format, ...)
 	while (p > buf  &&  isspace(p[-1]))
 		*--p = '\0';
 
-	//*p++ = '\r';
-	//*p++ = '\n';
+	*p++ = '\r';
+	*p++ = '\n';
 	*p = '\0';
 
-
-	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_BKGRND_YELLOW, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatReset{ ANSI_TEXT_COLOR_BLACK, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatTitle{ CONSOLE_COLOR_YELLOW_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_RED_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	std::clog << FormatTitle << "[installer] ";
 	std::clog << FormatText << buf;
-	std::clog << FormatReset << "";
 }
-void __cdecl ConsoleProcess(unsigned int id,const char *name)
+void __cdecl ConsoleNet(const char *format, ...)
 {
-	char    buf[32], *p = buf;
-	sprintf(buf, "[%5d]",id);	
-	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
+	char    buf[4096], *p = buf;
+	va_list args;
+	int     n;
 
-	std::clog << FormatId << p << "\t";
-	std::clog << FormatName << name << "\n";
+	va_start(args, format);
+	n = vsnprintf(p, sizeof buf - 3, format, args); // buf-3 is room for CR/LF/NUL
+	va_end(args);
+
+	p += (n < 0) ? sizeof buf - 3 : n;
+
+	while (p > buf  &&  isspace(p[-1]))
+		*--p = '\0';
+
+	*p++ = '\r';
+	*p++ = '\n';
+	*p = '\0';
+
+	EndOfLineEscapeTag FormatTitle{ CONSOLE_COLOR_CYAN_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_CYAN, ANSI_TEXT_COLOR_RESET };
+	std::clog << FormatTitle << "[net] ";
+	std::clog << FormatText << buf;
 }
-void __cdecl ConsoleProcessDenied(unsigned int id,const char *name)
+void __cdecl ConsoleError(const char *format, ...)
 {
-	char    buf[32], *p = buf;
-	sprintf(buf, "[%5d]",id);	
-	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_MAGENTA_BRIGHT, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_YELLOW, ANSI_TEXT_COLOR_RESET };
+	char    buf[4096], *p = buf;
+	va_list args;
+	int     n;
 
-	std::clog << FormatId << p << "\t";
-	std::clog << FormatName << name << "\n";
+	va_start(args, format);
+	n = vsnprintf(p, sizeof buf - 3, format, args); // buf-3 is room for CR/LF/NUL
+	va_end(args);
 
+	p += (n < 0) ? sizeof buf - 3 : n;
 
+	while (p > buf  &&  isspace(p[-1]))
+		*--p = '\0';
+
+	*p++ = '\r';
+	*p++ = '\n';
+	*p = '\0';
+
+	EndOfLineEscapeTag FormatTitle{ CONSOLE_COLOR_RED_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatText{ CONSOLE_COLOR_YELLOW_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	std::clog << FormatTitle << "[error] ";
+	std::clog << FormatText << buf;
 }
-void __cdecl ConsoleProcessPath(unsigned int id,const char *name,const char *path)
-{
-	char    buf[32], *p = buf;
-	sprintf(buf, "[%5d]",id);
-
-	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatPath{ ANSI_TEXT_COLOR_BLACK_BRIGHT, ANSI_TEXT_COLOR_RESET };
-	std::clog << FormatId << p << "\t";
-	if(strlen(name)<8){
-		std::clog << FormatName << name << "\t\t";
-	}else if(strlen(name)>14){
-		std::clog << FormatName << name << "\n\t\t";	
-	}else{
-		std::clog << FormatName << name << "\t";	
-	
-	}
-	
-	std::clog << FormatPath << path << "\n";
-}
-void __cdecl ConsoleTitle(const char *title)
-{
-	EndOfLineEscapeTag FormatTitle{ CONSOLE_COLOR_MAGENTA_BRIGHT, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatName{ BLACK_UNDERLINED, ANSI_TEXT_COLOR_RESET };
-	std::clog << FormatTitle << title;
-	std::clog << FormatName << " ";
-}
-void __cdecl ConsoleInfo(const char *title)
-{
-	EndOfLineEscapeTag FormatTitle{ WHITE_UNDERLINED_B, ANSI_TEXT_COLOR_RESET };
-	EndOfLineEscapeTag FormatName{ BLACK_UNDERLINED, ANSI_TEXT_COLOR_RESET };
-	std::clog << FormatTitle << title;
-	std::clog << FormatName << " ";
-}
-
 //==============================================================================
 // SystemDebugOutput
 // Kernel-mode and Win32 debug output

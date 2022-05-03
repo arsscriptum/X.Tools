@@ -13,8 +13,13 @@
 #ifndef __STDAFX_F__
 #define __STDAFX_F__
 
+#ifdef _DEBUG
+#define PRINT_OUT printf
+#define TPRINT_OUT _tprintf
+#else
 #define PRINT_OUT
-
+#define TPRINT_OUT
+#endif
 #define WIN32_LEAN_AND_MEAN
 #include "targetver.h"
 
@@ -161,5 +166,7 @@ GENERIC_EXECUTE | GENERIC_ALL)
 #else
 #  define			__PATH_SEPARATOR  _T('/')
 #endif
+
+
 
 #endif//__STDAFX_F__

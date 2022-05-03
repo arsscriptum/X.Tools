@@ -1,3 +1,0 @@
-[submodule "external/corelib"]
-	path = external/corelib
-	url = https://github.com/codecastor/corelib.git

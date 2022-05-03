@@ -11,17 +11,13 @@
      <SolutionRootDirectory>$(ProjectDir)..\</SolutionRootDirectory>
   </PropertyGroup> 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries>true</UseDebugLibraries>    
   </PropertyGroup> 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <CharacterSet>NotSet</CharacterSet>
-    <UseDebugLibraries>false</UseDebugLibraries>    
-  </PropertyGroup>   
-  <PropertyGroup Condition="'$(Configuration)'=='ReleaseUnicode'">
     <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries>false</UseDebugLibraries>    
-  </PropertyGroup> 
+  </PropertyGroup>    
   <PropertyGroup Label="ModuleMacros">
     <ProjectOutputDirectory>$(SolutionRootDirectory)bin\$(Platform)\$(Configuration)</ProjectOutputDirectory>
     <ProjectObjectDirectory>$(TempRoot)___temp_compilation_files\obj\$(TargetName)\$(Platform)\$(Configuration)</ProjectObjectDirectory>
@@ -67,7 +63,7 @@
     </QtRcc>
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(ProjectRoot)src\svcinc;$(ProjectRoot)src;$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectRoot)src;$(ProjectRoot)src\svcinc;$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CCC_STATIC_LINKING;_CRT_SECURE_NO_WARNINGS;CC_WINAPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
@@ -85,7 +81,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>DEBUG;DEVELOPMENT;DEBUG_INFO;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;DEBUG;DEVELOPMENT;DEBUG_INFO;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -93,28 +89,9 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>RELEASE;DEVELOPMENT;DEBUG_INFO;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleaseUnicode'">
-    <ClCompile>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions>UNICODE;RELEASE;DEVELOPMENT;DEBUG_INFO;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>  
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Retail'">
-    <ClCompile>
-      <DebugInformationFormat>None</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>MaxSpeed</Optimization>
-      <OptimizeReferences>true</OptimizeReferences>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>RETAIL;FINAL;PRODUCTION;FULL_OPTIMIZATION;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
 
   <Target Name="PrintBuildConfig" BeforeTargets="InitializeBuildStatus">
     <Message Text="================================================================================================" />

@@ -1,6 +1,3 @@
-// NativeTests.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
 
 #include "Controller.h"
@@ -9,9 +6,23 @@
 #include <iostream>
 #include <codecvt>
 #include <locale> 
-
+#include "win32.h"
 #include <iomanip>
 using namespace std;
+
+
+
+
+using namespace std;
+
+#ifdef _DEBUG
+bool SHOW_ERRORS = true;
+#else
+bool SHOW_ERRORS = false;
+#endif
+bool opt_svc_all = false;
+bool opt_svc_drv = false;
+bool opt_svc_win32 = false;
 bool opt_wait = false;
 bool opt_verbose = false;
 bool opt_svc_stop = false;
@@ -20,50 +31,22 @@ bool opt_svc_start = false;
 bool opt_svc_delete = false;
 bool opt_print_details = false;
 bool opt_svc_name = false;
-
+#ifdef _DEBUG
+bool dbgout = true;
+#else
+bool dbgout = false;
+#endif
 bool opt_svc_set_driver = false;
-bool opt_svc_set_driver_ex = false;
+bool opt_svc_set_permissions = false;
 std::wstring service_name;
 std::wstring binary_path;
 std::wstring invalid_opt;
+void InvalidArgument();
+void banner();
+void usage();
+void missingsvcname();
 
-std::wstring stringToWstring(const char* utf8Bytes)
-{
-	//setup converter
-	using convert_type = std::codecvt_utf8<typename std::wstring::value_type>;
-	std::wstring_convert<convert_type, typename std::wstring::value_type> converter;
 
-	//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
-	return converter.from_bytes(utf8Bytes);
-
-}
-std::wstring GetLastMsg()
-{
-	std::wstring _ret = stringToWstring("no error");
-	DWORD errorCode = GetLastError();
-	if (errorCode == 0)
-		return _ret;
-
-	// map errorCode into a system defined error string
-
-	DWORD dwFlags =
-		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER;
-	LPCVOID lpSource = NULL;
-	DWORD dwMessageID = errorCode;
-	DWORD dwLanguageId = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-	LPWSTR lpBuffer;
-	DWORD nSize = 0;
-	va_list* Arguments = NULL;
-
-	FormatMessage(
-		dwFlags, lpSource, dwMessageID, dwLanguageId,
-		(LPWSTR)&lpBuffer, nSize, Arguments
-	);
-	printf("%ls", lpBuffer);
-	std::wstring _msg = lpBuffer;
-	LocalFree(lpBuffer);
-	return _msg;
-}
 
 bool ProcessCommandLine(int argc, char *argv[])
 {
@@ -74,19 +57,50 @@ bool ProcessCommandLine(int argc, char *argv[])
 		// Is it a switch character?
 		if ((argv[i][0] == '-') || (argv[i][0] == '/'))
 		{
-			if ((argv[i][1] == 'n') || ((argv[i][1] == 'n')))
+			if ((argv[i][1] == 'f') || ((argv[i][1] == 'F')))
 			{
 				const char *name = argv[i+1];
 				service_name = stringToWstring(name);
 				opt_svc_name = true;
+				if (dbgout) {
+					std::wcout << "[DBG] Filter name: " << service_name << std::endl;
+				}
 				continue;
 			}
 			else if ((argv[i][1] == 'l') || ((argv[i][1] == 'L')))
 			{
 				opt_svc_list = true;
+				const char* svctype = argv[i + 1];
+				if (svctype) {
+					std::wstring service_type = stringToWstring(svctype);
+					if (!service_type.compare(_T("win32"))) {
+						opt_svc_win32 = true;
+						std::wcout << "[DBG] List Service WIN32" << std::endl;
+					}
+					else if (!service_type.compare(_T("all"))) {
+						opt_svc_all = true;
+						std::wcout << "[DBG] List Service ALL" << std::endl;
+					}
+					else if (!service_type.compare(_T("drv"))) {
+						opt_svc_drv = true;
+						std::wcout << "[DBG] List Service DRIVERS" << std::endl;
+					}
+				}
+				
+	
+				if (dbgout) {
+					std::wcout << "[DBG] List Service" << std::endl;
+				}
 				continue;
 			}	
-
+			else if ((argv[i][1] == 'e') || ((argv[i][1] == 'E')))
+			{
+				SHOW_ERRORS = true;
+				if (dbgout) {
+					std::wcout << "[DBG] SHOW ERRORS" << std::endl;
+				}
+				continue;
+			}
 			else if ((argv[i][1] == 'z') || ((argv[i][1] == 'Z')))
 			{
 				opt_svc_set_driver = true;
@@ -96,25 +110,52 @@ bool ProcessCommandLine(int argc, char *argv[])
 			}	
 			else if ((argv[i][1] == 'x') || ((argv[i][1] == 'X')))
 			{
-				opt_svc_set_driver_ex = true;
-				//const char *bin = argv[i+1];
-				//binary_path = stringToWstring(bin);
+				opt_svc_set_permissions = true;
+				const char* name = argv[i + 1];
+				if (!name) { missingsvcname(); return false; }
+				service_name = stringToWstring(name);
+				opt_svc_name = true;
+				if (dbgout) {
+					std::wcout << "[DBG] Set Permission on Service: " << service_name << std::endl;
+				}
 				continue;
 			}	
 
 			else if ((argv[i][1] == 's') || ((argv[i][1] == 'S')))
 			{
 				opt_svc_start = true;
+				const char* name = argv[i + 1];
+				if (!name) { missingsvcname(); return false;  }
+				service_name = stringToWstring(name);
+				opt_svc_name = true;
+				if (dbgout) {
+					std::wcout << "[DBG] Start Service: " << service_name << std::endl;
+				}
 				continue;
 			}	
 			else if ((argv[i][1] == 't') || ((argv[i][1] == 'T')))
 			{
 				opt_svc_stop = true;
+				const char* name = argv[i + 1];
+				if (!name) { missingsvcname(); return false; }
+				service_name = stringToWstring(name);
+				opt_svc_name = true;
+				if (dbgout) {
+					std::wcout << "[DBG] Stop Service: " << service_name << std::endl;
+				}
 				continue;
 			}
 			else if ((argv[i][1] == 'd') || ((argv[i][1] == 'D')))
 			{
 				opt_svc_delete = true;
+				const char* name = argv[i + 1];
+				if (!name) { missingsvcname(); return false; }
+				service_name = stringToWstring(name);
+				opt_svc_name = true;
+				if (dbgout) {
+					std::wcout << "[DBG] Delete Service: " << service_name << std::endl;
+				}
+				
 				continue;
 			}			
 			else if ((argv[i][1] == 'p') || ((argv[i][1] == 'P')))
@@ -129,7 +170,7 @@ bool ProcessCommandLine(int argc, char *argv[])
 			}
 			else if ((argv[i][1] == 'v') || ((argv[i][1] == 'V')))
 			{
-				std::wcout << "Verbose Mode: Enabled" << invalid_opt << std::endl;
+				std::wcout << "Verbose Mode: Enabled" << std::endl;
 				opt_verbose = true;
 				continue;
 			}
@@ -138,39 +179,60 @@ bool ProcessCommandLine(int argc, char *argv[])
 				opt_svc_list = true;
 				continue;
 			}
+			else if ((argv[i][1] == 'h') || ((argv[i][1] == 'H')))
+			{
+				banner();
+				usage();
+				valid = false;
+			}
 			else{
 				const char *opt = argv[i+1];
 				invalid_opt = stringToWstring(opt);
 				valid = false;
-				std::wcout << "svcstart v1.0 - Service Starter" << std::endl;
-				std::wcout << "invalid option " << invalid_opt << std::endl;
+				InvalidArgument();
 			}	
 		}
 	}
 	return valid;
 }
 
-void banner(){
+void banner() {
 	std::wcout << std::endl;
-	std::wcout << "svcstart v1.0 - Service Starter" << std::endl;
+	std::wcout << "xsvc v1.0 - Service Tool" << std::endl;
 	std::wcout << "Copyright (C) 2000-2021 Guillaume Plante" << std::endl;
 	std::wcout << "Service Tool Suite" << std::endl;
 	std::wcout << std::endl;
 }
 
-void usage(){
+
+void missingsvcname() {
+
+	banner();
+	std::wcout << "Missing service name" << std::endl;
 	std::wcout << std::endl;
-	std::wcout << "Usage: svcstart.exe [-n service name][-s][-t][-d][-p]" << std::endl;
-	std::wcout << "   -p          Print service status" << std::endl;
-	std::wcout << "   -n <name>   Service name" << std::endl;
-	std::wcout << "   -l          List services" << std::endl;
-	std::wcout << "   -s          Start" << std::endl;
-	std::wcout << "   -t          Stop" << std::endl;
-	std::wcout << "   -d          Delete" << std::endl;
-	std::wcout << "   -v          Verbose mode" << std::endl;
-	std::wcout << "   -z          Configure Service has driver" << std::endl;	
-	std::wcout << "   -x          Configure Service has driver" << std::endl;	
-	std::wcout << "   -w          Wait for state change (after start/stop/ert...)" << std::endl;
+	usage();
+}
+void InvalidArgument() {
+
+	banner();
+	std::wcout << "invalid argument: " << invalid_opt  <<  std::endl;
+	std::wcout << std::endl;
+	usage();
+}
+
+
+void usage(){
+	std::wcout << "Usage: xsvc.exe [-n service name][-s][-t][-d][-p]" << std::endl;
+	std::wcout << "   -p                  Print service status" << std::endl;
+	std::wcout << "   -f <name>           Set svc name filter" << std::endl;
+	std::wcout << "   -l win32/driver     List services" << std::endl;
+	std::wcout << "   -s <name>           Start" << std::endl;
+	std::wcout << "   -t <name>           Stop" << std::endl;
+	std::wcout << "   -d <name>           Delete" << std::endl;
+	std::wcout << "   -v                  Verbose mode" << std::endl;
+	std::wcout << "   -z                  Configure Service has driver" << std::endl;	
+	std::wcout << "   -x                  Configure Service has driver" << std::endl;	
+	std::wcout << "   -w                  Wait for state change (after start/stop/ert...)" << std::endl;
 	std::wcout << std::endl;
 }
 
@@ -204,10 +266,9 @@ int main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	bool valid = ProcessCommandLine(argc, argv);
 	if(!valid){
-		usage();
 		return -1;
 	}
-    auto services = ServiceEnumerator::EnumerateServices();
+    
 	bool found_svc = false;
 	size_t found = 0;
 	if (argc < 2) {
@@ -217,48 +278,22 @@ int main(int argc, char *argv[])
 		return 1; 
 	}
 
-
-	if(opt_svc_set_driver && opt_svc_name)
-	{
-		for (auto const& s : services){
-			found = s.ServiceName.find(service_name);
-			if (found != std::string::npos){
-				found_svc = true;
-				std::wcout << "[o] Found service " << service_name << std::endl;
-				auto service = ServiceController{ s.ServiceName };
-				auto config = service.GetServiceConfig();
-				config.SetDriverType("");
-				break;
-			}
-		}
-		return 0;
-	}
-	if(opt_svc_set_driver_ex && opt_svc_name)
-	{
-		for (auto const& s : services){
-			char buffer[512];
-			found = s.ServiceName.find(service_name);
-			if (found != std::string::npos){
-			char *str = new char[255];
-			sprintf_s(str, 255, "%ls", s.ServiceName.c_str());
-					sprintf_s(buffer, 512, "sc sdset \"%s\" D:(A;;CCLCSWLOCRRC;;;AU)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;S-1-5-21-1782791230-1887111140-533732638-1001)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)", str);
-					std::wcout << "Permissions for: " << str << std::endl << buffer << std::endl;
-					system(buffer);
-
-				found_svc = true;
-				std::wcout << "[o] Found service " << service_name << std::endl;
-				auto service = ServiceController{ s.ServiceName };
-				auto config = service.GetServiceConfig();
-				config.SetDriverType("LocalSystem");
-				break;
-			}
-		}
-		return 0;
-	}
-
+	
 
 	if(opt_svc_list)
 	{
+		ServiceType sctype = ServiceType::All;
+		if (opt_svc_drv) {
+			sctype = ServiceType::Driver;
+			std::wcout << "[o] Listing DRIVER services " << std::endl;
+		}
+		if (opt_svc_win32) {
+			sctype = ServiceType::Win32;
+			std::wcout << "[o] Listing WIN32 services " << std::endl;
+		}
+	
+		auto services = ServiceEnumerator::EnumerateServices(sctype);
+		
 		int maxlen0= 0;
 		int maxlen1=0;
 		int maxlen2= 0;
@@ -336,6 +371,58 @@ int main(int argc, char *argv[])
 
 		return 0;
 	}
+
+	auto services = ServiceEnumerator::EnumerateServices(ServiceType::All);
+
+
+	if (opt_svc_set_driver && opt_svc_name)
+	{
+		for (auto const& s : services) {
+			found = s.ServiceName.find(service_name);
+			if (found != std::string::npos) {
+				found_svc = true;
+				std::wcout << "[o] Found service " << service_name << std::endl;
+				auto service = ServiceController{ s.ServiceName };
+				auto config = service.GetServiceConfig();
+				config.SetDriverType("");
+				break;
+			}
+		}
+		return 0;
+	}
+	if (opt_svc_set_permissions && opt_svc_name)
+	{
+		for (auto const& s : services) {
+			char buffer[512];
+			found = s.ServiceName.find(service_name);
+			if (found != std::string::npos) {
+				char* str = new char[255];
+				sprintf_s(str, 255, "%ls", s.ServiceName.c_str());
+
+				sprintf_s(buffer, 512, "C:\\ProgramData\\chocolatey\\bin\\accesschk.exe -c \"%s\"", str);
+				system(buffer);
+
+
+
+				sprintf_s(buffer, 512, "sc sdset \"%s\" D:(A;;CCLCSWLOCRRC;;;AU)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;S-1-5-21-1782791230-1887111140-533732638-1001)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)", str);
+				std::wcout << "Permissions for: " << str << std::endl << buffer << std::endl;
+				system(buffer);
+
+				sprintf_s(buffer, 512, "C:\\ProgramData\\chocolatey\\bin\\accesschk.exe -c \"%s\"", str);
+				system(buffer);
+
+
+				found_svc = true;
+
+				auto service = ServiceController{ s.ServiceName };
+				auto config = service.GetServiceConfig();
+
+				break;
+			}
+		}
+		return 0;
+	}
+
 	std::wcout << "[o] Looking for " << service_name << std::endl;
 	for (auto const& s : services)
 	{
@@ -349,7 +436,7 @@ int main(int argc, char *argv[])
 			std::wcout << "[o] Found service " << service_name << std::endl;
 
 			auto service = ServiceController{ s.ServiceName };
-			if(!service.HasValidHandle()){continue;}
+
 			ServiceStatus st = service.GetStatus();
 			ServiceString str = ServiceStatusToString(st);
 			std::wcout << "[o] Service Status is " << str << std::endl;

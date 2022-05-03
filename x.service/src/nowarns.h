@@ -64,5 +64,9 @@
 #pragma warning( disable: 4917 )    // a GUID can only be associated with a class, interface or namespace
 #pragma warning( disable: 4996 )    // MSVC 9: a C std library function has been "deprecated" (says MS)
 
+#pragma warning( disable: 6031 )
+#pragma warning( disable: 6001 )
+#pragma warning( disable: 6262 )
+#pragma warning( disable: 6387 )
 
 #endif //__NO_WARNS_H__

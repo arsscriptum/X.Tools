@@ -64,12 +64,10 @@ goto :init
 :prebuild_header
     call %__lib_date% :getbuilddate
     call %__lib_out% :__out_d_red " ======================================================================="
-    call %__lib_out% :__out_l_red " Compilation started for %cd%  %__target%" 
-    call %__lib_out% :__out_l_blu " EXPORT TO %ToolsRoot%"  
+    call %__lib_out% :__out_l_red " Compilation started for %cd%  %__target%"  
     call %__lib_out% :__out_d_red " ======================================================================="
     call :build
     goto :eof
-
 
 :: ==============================================================================
 ::   call make
@@ -83,17 +81,22 @@ goto :init
 :call_make_build_export
     set config=%1
     set platform=%2
-    set export_path=%3
+    set export_path="C:\Programs\SystemTools"
     call %__makefile% /v /i %__build_cfg% /t Build /c %config% /p %platform% /x %export_path%
     goto :finished
 
-
+:: ==============================================================================
+::   Build static
+:: ==============================================================================
+:build_x86_debug
+    call :call_make_build Debug x86
+    goto :eof
 
 :: ==============================================================================
 ::   Build x64
 :: ==============================================================================
 :build_x64
-    call :call_make_build_export ReleaseUnicode x64 %ToolsRoot%
+    call :call_make_build_export Release x64
     goto :eof
 
 :: ==============================================================================
@@ -111,7 +114,20 @@ goto :init
 ::   Build
 :: ==============================================================================
 :build
-	rmrf .\vs\___temp_compilation_files  bin 
+	echo "%__target%"
+	if "%__target%" == "clean" (
+		call :clean
+
+		goto :finished
+		)
+    if "%__target%" == "rebuild" (
+		call :clean
+		)
+    if "%__target%" == "debug" (
+        call :build_x86_debug
+        goto :finished
+        )
+    ::call :build_x86
     call :build_x64
     goto :finished
 

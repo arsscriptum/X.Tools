@@ -80,3 +80,4 @@ String GetErrorMessage(DWORD dwErrorCode)
 			"Failed to retrieve error message string.");
 	}
 }
+
