@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 		if (found != std::string::npos)
 		{
 			found_svc = true;
-			std::wcout << "[o] Found service " << service_name << std::endl;
+			std::wcout << "[o] Found service " << s.ServiceName << std::endl;
 
 			auto service = ServiceController{ s.ServiceName };
 
