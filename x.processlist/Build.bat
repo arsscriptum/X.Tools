@@ -32,17 +32,17 @@ goto :init
 
 :header
     echo. %__script_name% v%__script_version%
-    echo.    This script is part of codecastor build wrappers.
+    echo.    This script is part of arsccriptum build wrappers.
     echo.
     goto :eof
 
 :header_err
     echo.**************************************************
-    echo.This script is part of codecastor build wrappers.
+    echo.This script is part of arsccriptum build wrappers.
     echo.**************************************************
     echo.
     echo. YOU NEED TO HAVE THE BuildAutomation Scripts setup on you system...
-    echo. https://github.com/codecastor/BuildAutomation
+    echo. https://github.com/arsccriptum/BuildAutomation
     goto :eof
 
 
@@ -79,10 +79,10 @@ goto :init
     call %__lib_out% :__out_d_yel " ======================================================================="
     call %__lib_out% :__out_n_d_cya "DELETE "  
     call %__lib_out% :__out_d_grn "%__tmp_path%"  
-    rmrf %__tmp_path%
+    rmdir /Q /S %__tmp_path% 2> NUL
     call %__lib_out% :__out_n_d_cya "DELETE "  
     call %__lib_out% :__out_d_grn "%__bin_path%"  
-    rmrf %__bin_path%
+    rmdir /Q /S %__bin_path% 2> NUL
 
     goto :eof
 
@@ -115,7 +115,7 @@ goto :init
 ::   Build x64
 :: ==============================================================================
 :build_x64
-    call :call_make_build_export Release x64 "c:\Programs\SystemTools"
+    call :call_make_build Release x64 "c:\Programs\SystemTools"
     goto :eof
 
 :: ==============================================================================

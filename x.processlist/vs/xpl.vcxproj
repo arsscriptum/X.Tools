@@ -96,6 +96,7 @@
     <ClCompile Include="..\src\log.cpp" />
     <ClCompile Include="..\src\ps_enum.cpp" />
     <ClCompile Include="..\src\uac_bypass.cpp" />
+    <ClCompile Include="..\src\psinfo.cpp" />
     <ClCompile Include="..\src\windows-api-ex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +120,7 @@
     <ClInclude Include="..\src\stdafx.h" />
     <ClInclude Include="..\src\targetver.h" />
     <ClInclude Include="..\src\uac_bypass.h" />
+    <ClInclude Include="..\src\psinfo.h" />
     <ClInclude Include="..\src\windows-api-ex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

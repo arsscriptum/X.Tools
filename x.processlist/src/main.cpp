@@ -23,20 +23,21 @@
 #include <filesystem>
 #include "uac_bypass.h"
 #include "ps_enum.h"
+#include "psinfo.h"
 #include <algorithm>
 #pragma message( "Compiling " __FILE__ )
 #pragma message( "Last modified on " __TIMESTAMP__ )
 
 void banner() {
 	std::wcout << std::endl;
-	COUTC("xps v2.1 - Process List Tool\n");
+	COUTC("pl v2.1 - Process List Tool\n");
 	COUTC("Built on %s\n", __TIMESTAMP__);
 	COUTC("Copyright (C) 2000-2021 Guillaume Plante\n");
 	COUTC("Process/Service Tool Suite\n");
 	std::wcout << std::endl;
 }
 void usage(){
-	COUTCS("Usage: xps.exe [-h][-p][-a][-n][-s] [ process name ]\n");
+	COUTCS("Usage: pl.exe [-h][-p][-a][-n][-s] [ process name ]\n");
 	COUTCS("   -p          Print process executable pats\n");
 	COUTCS("   -v          Verbose Show All process even access denied\n");
 	COUTCS("   -h          Help\n");
@@ -51,6 +52,7 @@ void usage(){
 template <class T, size_t N>
 void sort(std::array<T, N> &arr) {
     std::sort(std::begin(arr), std::end(arr));
+    //std::sort(std::begin(arr), std::end(arr), std::greater<double>{});
 }
 DWORD* sort6(PDWORD* v, int size)
 {
@@ -111,6 +113,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	CmdlineOption cmdlineOptionHelp({ "-h", "--help" }, "display this help");
 	CmdlineOption cmdlineOptionVerbose({ "-v", "--verbose" }, "verbose output");
 	CmdlineOption cmdlineOptionPath({ "-p", "--path" }, "print process path");
+	CmdlineOption cmdlineOptionPINFO({ "-i", "--info" }, "print process cpu usage and memory usage");
 	CmdlineOption cmdlineOptionNoBanner({ "-n", "--nobanner" }, "no banner");
 	CmdlineOption cmdlineOptionSort({ "-s", "--sort" }, "sort");
 	CmdlineOption cmdlineOptionAdmin({ "-a", "--admin" }, "admin mode");
@@ -119,6 +122,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	inputParser->addOption(cmdlineOptionHelp);
 	inputParser->addOption(cmdlineOptionVerbose);
 	inputParser->addOption(cmdlineOptionPath); 
+	inputParser->addOption(cmdlineOptionPINFO); 
 	inputParser->addOption(cmdlineOptionSort); 
 	inputParser->addOption(cmdlineOptionNoBanner); 
 	inputParser->addOption(cmdlineOptionAdmin); 
@@ -127,6 +131,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	bool optHelp = inputParser->isSet(cmdlineOptionHelp);
 	bool optVerbose = inputParser->isSet(cmdlineOptionVerbose);
 	bool optPsPath = inputParser->isSet(cmdlineOptionPath);
+	bool optPsInfo = inputParser->isSet(cmdlineOptionPINFO);
 	bool optSort = inputParser->isSet(cmdlineOptionSort);
 	bool optNoBanner = inputParser->isSet(cmdlineOptionNoBanner);
 	bool optAdmin = inputParser->isSet(cmdlineOptionAdmin);
@@ -160,6 +165,8 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	}
 	std::unordered_map<DWORD, std::string> ProcessList;
 
+	std::unordered_map<DWORD, ProcessInfo*> ProcessInfoList;
+
 	DWORD bufferSize = MAX_PATH;
 	TCHAR processname[MAX_PATH + 1], * stop;
 	TCHAR fileExt[MAX_PATH + 1];
@@ -172,6 +179,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	TCHAR* processIdentifier = nullptr;
 	bool shouldCheckUserDefined = false;
 	std::vector<std::string> ListedProcess;
+	ProcessInfo *pinfo = nullptr;
 	for (int x = 1; x < argc; x++) {
 		processIdentifier = argv[x];
 		
@@ -182,11 +190,22 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 		}
 	}
 
+	if(optPsInfo){
+		optPsPath = true;
+	}
+
 	nbProcesses = C::Process::FillProcessesList(&processes, sizeof(lpProcesses));
 	if (!nbProcesses) {
 		ConsoleTrace("ERROR : Could not enumerate process list\n");
 		return -1;
 	}
+
+	for (int i = 0; i < nbProcesses; i++) {
+		DWORD pid = processes[i];
+		ProcessInfo * pinfo = new ProcessInfo(pid);
+		ProcessInfoList[processes[i]] = pinfo;
+	}
+
 
 	if(optSort){
 		std::vector<DWORD> v;
@@ -206,16 +225,45 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	}
 	
 
-	
 	//COUTC("PROCESS LIST\n");
-	if(optPsPath){
-		COUTC("[ PID ]\tNAME\t\tPATH");COUTBB("\n");
+	if(optPsInfo){
+		COUTC("[ PID ]\tNAME\tCPU\t\tPATH");COUTBB("\n");
+	}
+	else if(optPsPath){
+		COUTC("[ PID ]\tCPU\tNAME\t\tPATH");COUTBB("\n");
 	}else{
-		COUTC("[ PID ]\tNAME");COUTBB("\n");
+		COUTC("[ PID ]\tCPU\tNAME");COUTBB("\n");
 	}
 	
 	int denied = 0;
 	int listed = 0;
+
+	if(optPsInfo){
+		while(true){
+			Sleep(1000);
+
+			system("cls");
+			COUTC("[ PID ]\tNAME\tCPU\tMEM\t\tPATH");COUTBB("\n");
+			for (int i = 0; i < nbProcesses; i++) {
+				hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processes[i]);
+				if (hProcess && C::Process::ProcessIdToName(processes[i], processname, bufferSize)) {
+					listed++;
+					std::string processnameDouble = std::regex_replace(processname, std::regex(R"(\\)"), R"(\\)");
+					decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
+					ProcessList[processes[i]] = fileName;
+					
+					pinfo = ProcessInfoList[processes[i]];
+					double cpuusage = pinfo->GetProcessCPUUsage();
+					double memoryused = pinfo->GetProcessMemoryUsed();
+					//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
+					//if(cpuusage > 0.0){
+						ConsoleProcessCPUMemory(processes[i], fileName,cpuusage,memoryused);	
+					//}
+				}
+			}
+		}
+	}
+
 	for (int i = 0; i < nbProcesses; i++) {
 		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processes[i]);
 		if (hProcess && C::Process::ProcessIdToName(processes[i], processname, bufferSize)) {
@@ -229,18 +277,24 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 					
 					bool found = (strstr(currentProcessString.c_str(),ups.c_str()));
 					if (found)
+						pinfo = ProcessInfoList[processes[i]];
+						double cpuusage = pinfo->GetProcessCPUUsage();
 						//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
-						ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str());
+						ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str(),cpuusage);
 				}
 			}
 			else{
 				if(optPsPath){
-					ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str());
+					pinfo = ProcessInfoList[processes[i]];
+					double cpuusage = pinfo->GetProcessCPUUsage();
+					ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str(),cpuusage);
 					//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
 				}
 				else{
-					ConsoleProcess(processes[i], fileName);
-					//_PRINTF(TEXT("[%5d]\t\t%s\n"), processes[i], fileName);		
+					pinfo = ProcessInfoList[processes[i]];
+					double cpuusage = pinfo->GetProcessCPUUsage();
+
+					ConsoleProcessCPU(processes[i], fileName,cpuusage);
 				}
 			}
 

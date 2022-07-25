@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <tchar.h>
 
+#include "psinfo.h"
+
 #include <windows.h>
 #include <Psapi.h>
 #include <sddl.h>
@@ -2201,9 +2203,9 @@ namespace C
 				if (copied > 0 && copied <= buffSize){
 					ret = TRUE;
 				}
-				else{
-					printf("Error QueryFullProcessImageName : %lu", GetLastError());
-				}
+				//else{
+					//printf("Error QueryFullProcessImageName : %lu", GetLastError());
+				//}
 				CloseHandle(handle);
 			}
 			else{

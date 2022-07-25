@@ -114,15 +114,55 @@ void __cdecl ConsoleProcessDenied(unsigned int id,const char *name)
 
 
 }
-void __cdecl ConsoleProcessPath(unsigned int id,const char *name,const char *path)
+
+void __cdecl ConsoleProcessCPU(unsigned int id,const char *name, double cpu)
+{
+	
+	char    buf[32], *p = buf;
+	char    buf1[32], *cpu_p = buf1;
+	sprintf(buf, "[%5d]",id);	
+	sprintf(buf1, "[%5f]",cpu);	
+	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
+
+	std::clog << FormatId << p << "\t";
+	std::clog << FormatName << cpu_p << "\t";
+	std::clog << FormatName << name << "\n";
+
+}
+
+
+void __cdecl ConsoleProcessCPUMemory(unsigned int id,const char *name, double cpu, double mem)
+{
+	
+	char    buf[32], *p = buf;
+	char    buf1[32], *cpu_p = buf1;
+	char    buf2[32], *mem_p = buf2;
+	sprintf(buf, "[%5d]",id);	
+	sprintf(buf1, "[%5f]",cpu);	
+	sprintf(buf2, "[%5f]",mem);	
+	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
+
+	std::clog << FormatId << p << "\t";
+	std::clog << FormatName << cpu_p << "\t";
+	std::clog << FormatName << mem_p << "\t";
+	std::clog << FormatName << name << "\n";
+
+}
+
+void __cdecl ConsoleProcessPath(unsigned int id,const char *name,const char *path, double cpu)
 {
 	char    buf[32], *p = buf;
-	sprintf(buf, "[%5d]",id);
+	char    buf1[32], *cpu_p = buf1;
+	sprintf(buf, "[%5d]",id);	
+	sprintf(buf1, "[%5f]",cpu);	
 
 	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
 	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
 	EndOfLineEscapeTag FormatPath{ ANSI_TEXT_COLOR_BLACK_BRIGHT, ANSI_TEXT_COLOR_RESET };
 	std::clog << FormatId << p << "\t";
+	std::clog << FormatName << cpu_p << "\t";
 	if(strlen(name)<8){
 		std::clog << FormatName << name << "\t\t";
 	}else if(strlen(name)>14){
