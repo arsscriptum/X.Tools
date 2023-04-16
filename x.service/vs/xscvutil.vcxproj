@@ -19,14 +19,13 @@
     <ProjectGuid>{47711EAC-7501-4995-8CA2-CE81DC72648F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>xscvutil</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(ProjectDir)cfg\xscvutil.props" Label="ProjectConfig" />
   <Import Project="$(ProjectDir)cfg\dejainsight.props" Condition="'$(dejainsight_integration)' == ''" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemGroup>

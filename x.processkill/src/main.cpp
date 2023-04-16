@@ -4,7 +4,7 @@
 //     main.cpp
 //
 //============================================================================
-//  Copyright (C) Guilaume Plante 2020 <cybercastor@icloud.com>
+//  Copyright (C) Guilaume Plante 2020 <guillaumeplante.qc@icloud.com>
 //==============================================================================
 
 
