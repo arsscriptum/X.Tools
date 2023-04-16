@@ -142,31 +142,22 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	std::string commandLineStr= "";
 	for (int i=1;i<argc;i++) commandLineStr.append(std::string(argv[i]).append(" "));
 
-	if(optNoBanner == false){
-		banner();
-	}
+
 	if(optHelp){
 		usage();
 		return 0;
 	}
 	if(optNoBanner){
 		bool privEnabled = C::Process::EnableDebugPrivilege();
-		COUTY("EnableDebugPrivilege: %d",privEnabled?1:0);
+		printf("EnableDebugPrivilege: %d",privEnabled?1:0);
 	}
 	
 
-	if(optAdmin){
-		if(C::Process::IsRunAsAdministrator() == false){
-			COUTY("Request Admin Mode\n");
-			C::Process::ElevateNow(argc, commandLineStr.c_str(),envp);
-		}else{
-			COUTR("Request Admin Mode: ALREADY in ADMIN MODE\n");
-		}
-	}
+
 	std::unordered_map<DWORD, std::string> ProcessList;
 
 	std::unordered_map<DWORD, ProcessInfo*> ProcessInfoList;
-
+	TCHAR searchPsName[MAX_PATH + 1];
 	DWORD bufferSize = MAX_PATH;
 	TCHAR processname[MAX_PATH + 1], * stop;
 	TCHAR fileExt[MAX_PATH + 1];
@@ -178,15 +169,16 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	processes = lpProcesses;
 	TCHAR* processIdentifier = nullptr;
 	bool shouldCheckUserDefined = false;
+	bool foundProcess = false;
 	std::vector<std::string> ListedProcess;
 	ProcessInfo *pinfo = nullptr;
 	for (int x = 1; x < argc; x++) {
 		processIdentifier = argv[x];
 		
 		if (isalpha(*processIdentifier)){
-			ListedProcess.push_back(processIdentifier);
+			_tcscpy(searchPsName,processIdentifier);
 			shouldCheckUserDefined = true;
-			COUTY("Looking for specific : %s\n", processIdentifier);
+			//printf("Looking for specific : %s\n", processIdentifier);
 		}
 	}
 
@@ -209,7 +201,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 
 	if(optSort){
 		std::vector<DWORD> v;
-		COUTY("[sorting] %d elements...\n",nbProcesses);
+		//printf("[sorting] %d elements...\n",nbProcesses);
 		for (int i = 0; i < nbProcesses; i++) {
 			v.push_back(processes[i]);
 		}
@@ -217,7 +209,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	
 		for (int i = 0; i < nbProcesses; i++) {
 			if(optVerbose){
-				COUTY("[sorting] %d/%d %5d %5d", i,(int)nbProcesses,processes[i],v[i]);	
+				printf("[sorting] %d/%d %5d %5d", i,(int)nbProcesses,processes[i],v[i]);	
 			}
 			
 			processes[i] = v[i];
@@ -226,44 +218,19 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	
 
 	//COUTC("PROCESS LIST\n");
-	if(optPsInfo){
-		COUTC("[ PID ]\tNAME\tCPU\t\tPATH");COUTBB("\n");
-	}
-	else if(optPsPath){
-		COUTC("[ PID ]\tCPU\tNAME\t\tPATH");COUTBB("\n");
-	}else{
-		COUTC("[ PID ]\tCPU\tNAME");COUTBB("\n");
-	}
+	//if(optPsInfo){
+	//	COUTC("[ PID ]\tNAME\tCPU\t\tPATH");COUTBB("\n");
+	//}
+	//else if(optPsPath){
+	//	COUTC("[ PID ]\tCPU\tNAME\t\tPATH");COUTBB("\n");
+	//}else{
+	//	COUTC("[ PID ]\tCPU\tNAME");COUTBB("\n");
+	//}
 	
 	int denied = 0;
 	int listed = 0;
-
-	if(optPsInfo){
-		while(true){
-			Sleep(1000);
-
-			system("cls");
-			COUTC("[ PID ]\tNAME\tCPU\tMEM\t\tPATH");COUTBB("\n");
-			for (int i = 0; i < nbProcesses; i++) {
-				hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processes[i]);
-				if (hProcess && C::Process::ProcessIdToName(processes[i], processname, bufferSize)) {
-					listed++;
-					std::string processnameDouble = std::regex_replace(processname, std::regex(R"(\\)"), R"(\\)");
-					decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
-					ProcessList[processes[i]] = fileName;
-					
-					pinfo = ProcessInfoList[processes[i]];
-					double cpuusage = pinfo->GetProcessCPUUsage();
-					double memoryused = pinfo->GetProcessMemoryUsed();
-					//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
-					//if(cpuusage > 0.0){
-						ConsoleProcessCPUMemory(processes[i], fileName,cpuusage,memoryused);	
-					//}
-				}
-			}
-		}
-	}
-
+	int totalProcesListed=0;
+	int ret = 0;
 	for (int i = 0; i < nbProcesses; i++) {
 		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processes[i]);
 		if (hProcess && C::Process::ProcessIdToName(processes[i], processname, bufferSize)) {
@@ -272,52 +239,26 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 			decomposePath(processnameDouble.c_str(), fileDir, fileName, fileExt);
 			ProcessList[processes[i]] = fileName;
 			if(shouldCheckUserDefined){
-				std::string currentProcessString = fileName;
-				for (const std::string& ups : ListedProcess) {
-					
-					bool found = (strstr(currentProcessString.c_str(),ups.c_str()));
-					if (found)
-						pinfo = ProcessInfoList[processes[i]];
-						double cpuusage = pinfo->GetProcessCPUUsage();
-						//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
-						ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str(),cpuusage);
+				if(!strcmp(searchPsName,fileName)){
+					printf("[%d] %s\n",processes[i], fileName);
+					foundProcess = true;
+					totalProcesListed++;
 				}
 			}
 			else{
-				if(optPsPath){
-					pinfo = ProcessInfoList[processes[i]];
-					double cpuusage = pinfo->GetProcessCPUUsage();
-					ConsoleProcessPath(processes[i], fileName, processnameDouble.c_str(),cpuusage);
-					//_PRINTF(TEXT("[%5d]\t\t%s\t%s\n"), processes[i], fileName, processnameDouble.c_str());	
-				}
-				else{
-					pinfo = ProcessInfoList[processes[i]];
-					double cpuusage = pinfo->GetProcessCPUUsage();
-
-					ConsoleProcessCPU(processes[i], fileName,cpuusage);
-				}
+				printf("[%d] %s\n",processes[i], fileName);
+				totalProcesListed++;
 			}
 
-		}else{
-			if(optVerbose){
-				denied++;
-				ConsoleProcessDenied(processes[i], "permission denied");
-					
-			}
 		}
-	
-	}
-	COUTY("Detected %d total processes. listed %d (%d denied)", (int)nbProcesses,listed,denied);
-	if (C::Process::IsRunAsAdministrator()) {
-		COUTRS("Running with admin privileges\n");
-	}else{
-		COUTRS("Running without admin privileges\n");
 	}
 
-	if(shouldCheckUserDefined){
-		printf("Press any key...");
-    	getchar();
+	if(shouldCheckUserDefined && !foundProcess){
+		printf("Error: cannot find process \"%s\".\n",searchPsName);
+		ret=-1;
 	}
+	printf("Detected %d total processes. listed %d (%d denied)", (int)nbProcesses,totalProcesListed,denied);
 
-	return 0;
+
+	return ret;
 }
