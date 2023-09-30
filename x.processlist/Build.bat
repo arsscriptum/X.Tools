@@ -37,11 +37,12 @@ goto :init
     goto :eof
 
 :header_err
-    echo.**************************************************
+    echo. ======================================================
     echo.This script is part of arsccriptum build wrappers.
-    echo.**************************************************
+    echo. ======================================================
     echo.
-    echo. YOU NEED TO HAVE THE BuildAutomation Scripts setup on you system...
+    echo. YOU NEED TO HAVE THE BuildAutomation Scripts setup
+    echo. on you system...
     echo. https://github.com/arsccriptum/BuildAutomation
     goto :eof
 
@@ -157,3 +158,4 @@ goto :init
 
 :finished
     call %__lib_out% :__out_d_grn "Build complete"
+
