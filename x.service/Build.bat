@@ -15,7 +15,7 @@ goto :init
 
 :init
     set "__scripts_root=%AutomationScriptsRoot%"
-    call :read_script_root development\build-automation  BuildAutomation
+    call :read_script_data development\build-automation  BuildAutomation
     set "__script_file=%~0"
     set "__target=%~1"
     set "__script_path=%~dp0"
@@ -45,7 +45,8 @@ goto :init
     goto :eof
 
 
-:read_script_root
+:read_script_data
+    if not defined OrganizationHKCU::=          call :header_err && call :error_missing_path OrganizationHKCU::= & goto :eof
     set regpath=%OrganizationHKCU::=%
     for /f "tokens=2,*" %%A in ('REG.exe query %regpath%\%1 /v %2') do (
             set "__scripts_root=%%B"
@@ -153,4 +154,5 @@ goto :init
 
 :finished
     call %__lib_out% :__out_d_grn "Build complete"
+
 
