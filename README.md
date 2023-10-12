@@ -1,9 +1,10 @@
-𝓐𝓡𝓢 𝓢𝓒𝓡𝓘𝓟𝓣𝓤𝓜
--------------------------------------
-
 # X.Tools
 
 3 tools to manage processes and services on Windows.
+
+1. x.processkill : kill a process or processes matching a string passed as argument
+1. x.processlist : get a list of processes
+1. x.service     : manipulate services
 
 ##  x.processkill
 
