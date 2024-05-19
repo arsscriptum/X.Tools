@@ -7,13 +7,8 @@
 //  Copyright (C) Guilaume Plante 2020 <cybercastor@icloud.com>
 //==============================================================================
 
-
-
 #include "stdafx.h"
-#include "windows-api-ex.h"
-#include "cmdline.h"
-#include "Shlwapi.h"
-#include "phantom.h"
+
 #include <codecvt>
 #include <locale>
 #include <vector>
@@ -21,10 +16,21 @@
 #include <iterator>
 #include <regex>
 #include <filesystem>
+#include <algorithm>
+#include <array>
+#include <iostream>
+#include <iomanip>
+
+#include "windows-api-ex.h"
+#include "cmdline.h"
+#include "Shlwapi.h"
+#include "phantom.h"
 #include "uac_bypass.h"
 #include "ps_enum.h"
 #include "psinfo.h"
-#include <algorithm>
+
+using namespace std;
+
 #pragma message( "Compiling " __FILE__ )
 #pragma message( "Last modified on " __TIMESTAMP__ )
 
@@ -47,7 +53,14 @@ void usage(){
 }
 
  
-#include <array>
+std::string ConstructCommand(const std::string& executablePath, const std::vector<std::string>& arguments) {
+	std::ostringstream command;
+	command << "& \"" << executablePath << "\"";
+	for (const auto& arg : arguments) {
+		command << " \"" << arg << "\"";
+	}
+	return command.str();
+}
  
 template <class T, size_t N>
 void sort(std::array<T, N> &arr) {
@@ -152,7 +165,37 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 		printf("EnableDebugPrivilege: %d",privEnabled?1:0);
 	}
 	
+	
+	
+	if (optAdmin) {
+		if (C::Process::IsRunAsAdministrator() == false) {
+			string szCommand;
+			std::vector<std::string> arguments;
+			
 
+			for (int i = 0; i < argc; i++) {
+				if (i == 0) {
+					
+					szCommand = argv[i];
+				}
+				else {
+					string a = argv[i];
+					if (a != "-a") {
+						arguments.push_back(a);
+					}
+					
+				}
+			}
+			string psCommand = ConstructCommand(szCommand, arguments);
+			printf("ps command: %s\n", psCommand.c_str());
+			string encodedCommand = C::Convert::base64::encode64(psCommand);
+			C::Process::RunPowerShellCmdAsAdministrator(psCommand);
+			return 0;
+			
+		}
+	}
+	
+	
 
 	std::unordered_map<DWORD, std::string> ProcessList;
 
@@ -226,13 +269,18 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	//}else{
 	//	COUTC("[ PID ]\tCPU\tNAME");COUTBB("\n");
 	//}
-	
+
+	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
+	EndOfLineEscapeTag FormatPath{ ANSI_TEXT_COLOR_BLACK_BRIGHT, ANSI_TEXT_COLOR_RESET };
+
 	int denied = 0;
 	int listed = 0;
 	int totalProcesListed=0;
 	int ret = 0;
 	for (int i = 0; i < nbProcesses; i++) {
-		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processes[i]);
+
+		hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processes[i]);
 		if (hProcess && C::Process::ProcessIdToName(processes[i], processname, bufferSize)) {
 			listed++;
 			std::string processnameDouble = std::regex_replace(processname, std::regex(R"(\\)"), R"(\\)");
@@ -240,17 +288,34 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 			ProcessList[processes[i]] = fileName;
 			if(shouldCheckUserDefined){
 				if(!strcmp(searchPsName,fileName)){
-					printf("[%d] %s\n",processes[i], fileName);
+					if (optPsPath) {
+						cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
+						cout << ANSI_TEXT_COLOR_YELLOW << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET;
+						cout << ANSI_TEXT_COLOR_BLUE << left << processname << ANSI_TEXT_COLOR_RESET << endl;
+					}
+					else {
+						cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
+						cout << ANSI_TEXT_COLOR_YELLOW_BRIGHT << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET << endl;
+					}
 					foundProcess = true;
 					totalProcesListed++;
 				}
 			}
 			else{
-				printf("[%d] %s\n",processes[i], fileName);
+				if (optPsPath) {
+					cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
+					cout << ANSI_TEXT_COLOR_YELLOW << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET;
+					cout << ANSI_TEXT_COLOR_BLUE << left << processname << ANSI_TEXT_COLOR_RESET << endl;
+				}
+				else {
+					cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
+					cout << ANSI_TEXT_COLOR_YELLOW_BRIGHT << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET << endl;
+				}
 				totalProcesListed++;
 			}
 
 		}
+
 	}
 
 	if(shouldCheckUserDefined && !foundProcess){

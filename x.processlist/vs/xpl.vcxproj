@@ -154,6 +154,7 @@
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(WTL_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectRoot)resources\modern_style.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -164,6 +165,9 @@
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\resources\app.manifest</ManifestFile>
       <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RequireAdministrator</UACExecutionLevel>
+      <UACUIAccess Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UACUIAccess>
+      <AllowIsolation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</AllowIsolation>
+      <EnableUAC Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</EnableUAC>
     </Link>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\resources\app.manifest</ManifestFile>
@@ -173,6 +177,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(WTL_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectRoot)resources\modern_style.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -181,8 +186,11 @@
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectRoot)resources\modern_style.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <Link>
-      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\resources\app.manifest</ManifestFile>
+      <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)app.manifest</ManifestFile>
       <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">RequireAdministrator</UACExecutionLevel>
+      <EnableUAC Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</EnableUAC>
+      <UACUIAccess Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</UACUIAccess>
+      <AllowIsolation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</AllowIsolation>
     </Link>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\resources\app.manifest</ManifestFile>
@@ -192,6 +200,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleaseUnicode'">
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">$(WTL_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">$(ProjectRoot)resources\modern_style.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -202,6 +211,9 @@
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">$(ProjectDir)..\resources\app.manifest</ManifestFile>
       <UACExecutionLevel Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">RequireAdministrator</UACExecutionLevel>
+      <EnableUAC Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">true</EnableUAC>
+      <UACUIAccess Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">true</UACUIAccess>
+      <AllowIsolation Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|x64'">false</AllowIsolation>
     </Link>
     <Link>
       <ManifestFile Condition="'$(Configuration)|$(Platform)'=='ReleaseUnicode|Win32'">$(ProjectDir)..\resources\app.manifest</ManifestFile>

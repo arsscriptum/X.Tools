@@ -20,8 +20,11 @@
 #include <TlHelp32.h>
 #include <lm.h>
 #include <Psapi.h>
+#include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
+
 
 #ifdef UNICODE
 #define LOADLIBRARY "LoadLibraryW"
@@ -154,12 +157,15 @@ namespace C
 
 		// The following 2 functions (allocate_argn/release_argn) with utils wstrlen/dup are used to convert WSTR (unicode) Main Argv parameter to char. 
 		// This is for example used for cmdline parsing
-		int wstrlen(_TCHAR * wstr);
-		char * wstrdup(_TCHAR * wSrc);
-		char ** allocate_argn(int argc, _TCHAR* argv[]);
-		void release_argn(int argc, char ** nargv);
+		int wstrlen(_TCHAR* wstr);
+		char* wstrdup(_TCHAR* wSrc);
+		char** allocate_argn(int argc, _TCHAR* argv[]);
+		void release_argn(int argc, char** nargv);
 
-
+		namespace base64 {
+			const std::string encode64(const std::string& input);
+			const std::string decode64(const std::string& input);
+		}
 		LPWSTR StringToString(LPCSTR str);
 		LPSTR StringToString(LPCWSTR str);
 
@@ -315,6 +321,7 @@ namespace C
 		BOOL InjectDll(HANDLE process, LPCWSTR dllPath);
 		BOOL SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege);
 		// Privilage Elevation
+
 		DWORD GetCurrentSessionId();
 		BOOL CreateInteractiveProcessForUser(LPTSTR lpszUsername, LPTSTR lpszDomain, LPTSTR lpszPassword, LPTSTR lpCommandLine);
 		BOOL CreateInteractiveProcess(TCHAR* pszCommandLine);
@@ -328,6 +335,8 @@ namespace C
 		DWORD GetProcessSession(HANDLE hProcess);
 		BOOL IsRunAsAdministrator();
 		void ElevateNow(int argc, const TCHAR *argv, TCHAR envp);
+		bool RunAsAdministrator(const std::string& command, const std::string& arguments);
+		bool RunPowerShellCmdAsAdministrator(const std::string& Command);
 		BOOL EnableRequiredPrivileges();
 		bool FillModuleListPSAPI(TModules& mods, DWORD pid, HANDLE hProcess);
 		bool FillModuleListTH32(C::Process::TModules& modules, DWORD pid);
