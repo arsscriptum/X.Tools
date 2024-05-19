@@ -94,6 +94,7 @@
     <ClCompile Include="..\src\cthread.cpp" />
     <ClCompile Include="..\src\init.cpp" />
     <ClCompile Include="..\src\log.cpp" />
+    <ClCompile Include="..\src\psutils.cpp" />
     <ClCompile Include="..\src\ps_enum.cpp" />
     <ClCompile Include="..\src\uac_bypass.cpp" />
     <ClCompile Include="..\src\psinfo.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="..\src\phantom\process_info.h" />
     <ClInclude Include="..\src\phantom\technique_1.h" />
     <ClInclude Include="..\src\phantom\technique_2.h" />
+    <ClInclude Include="..\src\psutils.h" />
     <ClInclude Include="..\src\ps_enum.h" />
     <ClInclude Include="..\src\stdafx.h" />
     <ClInclude Include="..\src\targetver.h" />
@@ -178,6 +180,12 @@
     <ClCompile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(WTL_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MaxSpeed</Optimization>
+      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</InlineFunctionExpansion>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IntrinsicFunctions>
+      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
+      <OmitFramePointers Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</OmitFramePointers>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</WholeProgramOptimization>
     </ClCompile>
     <Manifest>
       <AdditionalManifestFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectRoot)resources\modern_style.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>

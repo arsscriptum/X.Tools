@@ -30,19 +30,8 @@
 #include "technique_2.h"
 //#endif
 
-void Phant0m() {
+void InvokeEventLogSpecial() {
 
-	puts(
-		"\t ___ _  _   _   _  _ _____ __  __  __ \n"
-		"\t| _ \\ || | /_\\ | \\| |_   _/  \\|  \\/  |\n"
-		"\t|  _/ __ |/ _ \\| .` | | || () | |\\/| |\n"
-		"\t|_| |_||_/_/ \\_\\_|\\_| |_| \\__/|_|  |_|\n\n"
-		"\tVersion: \t2.0\n"
-		"\tAuthor: \tHalil Dalabasmaz\n"
-		"\tWWW: \t\tartofpwn.com\n"
-		"\tTwitter: \t@hlldz\n"
-		"\tGithub: \t@hlldz\n"
-	);
 
 	if (enoughIntegrityLevel() == TRUE) {
 
@@ -93,9 +82,3 @@ void Phant0m() {
 
 }
 
-int RunPhantom() {
-
-	Phant0m();
-
-	return 0;
-}

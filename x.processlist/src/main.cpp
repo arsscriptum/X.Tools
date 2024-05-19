@@ -28,6 +28,7 @@
 #include "uac_bypass.h"
 #include "ps_enum.h"
 #include "psinfo.h"
+#include "psutils.h"
 
 using namespace std;
 
@@ -273,7 +274,7 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 	EndOfLineEscapeTag FormatId{ ANSI_TEXT_COLOR_BLUE_BRIGHT, ANSI_TEXT_COLOR_RESET };
 	EndOfLineEscapeTag FormatName{ ANSI_TEXT_COLOR_WHITE, ANSI_TEXT_COLOR_RESET };
 	EndOfLineEscapeTag FormatPath{ ANSI_TEXT_COLOR_BLACK_BRIGHT, ANSI_TEXT_COLOR_RESET };
-
+	PrintProcessListTitle(optPsPath);
 	int denied = 0;
 	int listed = 0;
 	int totalProcesListed=0;
@@ -288,32 +289,18 @@ int main(int argc, TCHAR **argv, TCHAR envp)
 			ProcessList[processes[i]] = fileName;
 			if(shouldCheckUserDefined){
 				if(!strcmp(searchPsName,fileName)){
-					if (optPsPath) {
-						cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
-						cout << ANSI_TEXT_COLOR_YELLOW << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET;
-						cout << ANSI_TEXT_COLOR_BLUE << left << processname << ANSI_TEXT_COLOR_RESET << endl;
-					}
-					else {
-						cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
-						cout << ANSI_TEXT_COLOR_YELLOW_BRIGHT << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET << endl;
-					}
+					PrintProcessPropertiesOneLine(hProcess, fileName, processname, optPsPath);
 					foundProcess = true;
 					totalProcesListed++;
 				}
 			}
 			else{
-				if (optPsPath) {
-					cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
-					cout << ANSI_TEXT_COLOR_YELLOW << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET;
-					cout << ANSI_TEXT_COLOR_BLUE << left << processname << ANSI_TEXT_COLOR_RESET << endl;
-				}
-				else {
-					cout << ANSI_TEXT_COLOR_RED << right << setfill(' ') << setw(6) << processes[i] << ANSI_TEXT_COLOR_RESET << "  ";
-					cout << ANSI_TEXT_COLOR_YELLOW_BRIGHT << left << setfill(' ') << setw(32) << fileName << ANSI_TEXT_COLOR_RESET << endl;
-				}
+				PrintProcessPropertiesOneLine(hProcess, fileName, processname, optPsPath);
 				totalProcesListed++;
 			}
-
+		}
+		else {
+			denied++;
 		}
 
 	}
